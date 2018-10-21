@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentEverythingServiceBusConnectorLib", "CommentEverythingServiceBusConnectorLib\CommentEverythingServiceBusConnectorLib.csproj", "{5BD0E19A-558C-4175-821F-E0C0707B454C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommentEverythingServiceBusConnectorLib", "CommentEverythingServiceBusConnectorNETCore\CommentEverythingServiceBusConnectorLib.csproj", "{236C28D8-357D-429A-A014-0EC45422B10E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5BD0E19A-558C-4175-821F-E0C0707B454C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BD0E19A-558C-4175-821F-E0C0707B454C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5BD0E19A-558C-4175-821F-E0C0707B454C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5BD0E19A-558C-4175-821F-E0C0707B454C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{236C28D8-357D-429A-A014-0EC45422B10E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{236C28D8-357D-429A-A014-0EC45422B10E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{236C28D8-357D-429A-A014-0EC45422B10E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{236C28D8-357D-429A-A014-0EC45422B10E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
