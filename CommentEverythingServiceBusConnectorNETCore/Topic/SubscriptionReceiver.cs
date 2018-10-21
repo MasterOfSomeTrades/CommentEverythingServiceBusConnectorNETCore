@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CommentEverythingServiceBusConnectorLib.Topic
 {
-    abstract class SubscriptionReceiver {
+    public abstract class SubscriptionReceiver {
         ISubscriptionClient subscriptionClient;
         private string ServiceBusConnectionString;
         private string TopicName;
