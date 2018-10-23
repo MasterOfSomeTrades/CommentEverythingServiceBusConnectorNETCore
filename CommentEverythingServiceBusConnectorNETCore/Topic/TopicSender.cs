@@ -45,7 +45,30 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
         public async Task<bool> Send(string message, string groupId, string context) {
             bool success = false;
             try {
-                success = await Send(new string[] { message }, groupId, context);
+                success = await Send(new string[] { message }, groupId, context, DateTime.MinValue);
+            } catch (Exception ex) {
+                logger.LogError(ex.Message);
+                logger.LogDebug(ex.StackTrace);
+                success = false;
+            }
+
+            return success;
+        }
+
+        /// <summary>
+        /// Send scheduled messages in a session to a Topic with custom UserProperties of CollectionId, Count, and Context.
+        /// Messages are labelled "first," "interim," and "last" to distinguish messages in session.
+        /// If only one message exists in the session, the message is labelled "last."
+        /// </summary>
+        /// <param name="messages">List of messages to write to Topic</param>
+        /// <param name="groupId">Session Id</param>
+        /// <param name="context">Used as CorrelationId and UserProperty['Context'] to filter messages</param>
+        /// <param name="scheduledTime">DateTime in UTC to write to topic</param>
+        /// <returns></returns>
+        public async Task<bool> Send(string message, string groupId, string context, DateTime scheduledTime) {
+            bool success = false;
+            try {
+                success = await Send(new string[] { message }, groupId, context, scheduledTime);
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
@@ -64,7 +87,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
         /// <param name="groupId">Session Id</param>
         /// <param name="context">Used as CorrelationId and UserProperty['Context'] to filter messages</param>
         /// <returns>Success (true or false)</returns>
-        public async Task<bool> Send(IList<string> messages, string groupId, string context) {
+        public async Task<bool> Send(IList<string> messages, string groupId, string context, DateTime scheduledTime) {
             bool success = false;
 
             try {
@@ -95,6 +118,9 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
                     msg.UserProperties.Add("Count", messages.Count);
                     msg.UserProperties.Add("Context", context);
                     msg.MessageId = Guid.NewGuid().ToString("D");
+                    if (scheduledTime != DateTime.MinValue) {
+                        msg.ScheduledEnqueueTimeUtc = scheduledTime;
+                    }
                     if (_currentSizeTotal + msg.Size > 100000) {
                         _currentSizeTotal = 0;
                         _messageListStructure.Add(new List<Message>());
