@@ -126,7 +126,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
                         _messageListStructure.Add(new List<Message>());
                     }
                     _currentSizeTotal = _currentSizeTotal + msg.Size;
-                    logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Running total messages size " + _currentSizeTotal.ToString());
+                    logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
 
