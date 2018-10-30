@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>CommentEverythingServiceBusConnectorNETCore</AssemblyName>
+    <RootNamespace>CommentEverythingServiceBusConnectorNETCore</RootNamespace>
+    <Company>Comment Everything</Company>
+    <Authors>Comment Everything</Authors>
+    <Copyright>Copyright 2018</Copyright>
+    <Description>Connector for Microsoft Service Bus (Read and write to Topics and Queues). Makes reading and writing easier via batching and standardized methods.</Description>
+    <PackageProjectUrl />
+    <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
+    <PackageReleaseNotes>Added queue functionality.</PackageReleaseNotes>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
