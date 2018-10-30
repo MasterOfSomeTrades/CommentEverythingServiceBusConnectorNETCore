@@ -12,8 +12,8 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Added queue functionality.</PackageReleaseNotes>
-    <Version>2.0.0</Version>
+    <PackageReleaseNotes>Added queue reading functionality.</PackageReleaseNotes>
+    <Version>2.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
