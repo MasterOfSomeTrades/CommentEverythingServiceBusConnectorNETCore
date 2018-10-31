@@ -12,8 +12,8 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Added queue reading functionality.</PackageReleaseNotes>
-    <Version>2.1.0</Version>
+    <PackageReleaseNotes>Added support for Event Type in User Properties of messages on Topic.</PackageReleaseNotes>
+    <Version>2.2.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
