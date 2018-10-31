@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-<<<<<<< Updated upstream
-=======
     <AssemblyName>CommentEverythingServiceBusConnectorNETCore</AssemblyName>
     <RootNamespace>CommentEverythingServiceBusConnectorNETCore</RootNamespace>
     <Company>Comment Everything</Company>
@@ -17,7 +15,6 @@
     <PackageReleaseNotes>Added queue reading functionality.</PackageReleaseNotes>
     <Version>2.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
->>>>>>> Stashed changes
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>1.0.0</version>
+    <title>CommentEverythingServiceBusConnectorNETCore</title>
+    <authors>Comment Everything</authors>
+    <owners>Comment Everything</owners>
+    <projectUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Connector for Microsoft Service Bus (Read and write to Topics and Queues). Makes reading and writing easier via batching and standardized methods.</description>
+    <releaseNotes>Added Topic reading and writing.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>Microsoft Azure ServiceBus Topics Queues</tags>
+  </metadata>
+</package>
