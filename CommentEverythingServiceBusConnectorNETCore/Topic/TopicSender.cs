@@ -34,6 +34,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
 
+        public bool Test() {
+            return true;
+        }
+
         /// <summary>
         /// Send single message (only one message in session) to Topic with custom UserProperties of CollectionId, Count, and Context.
         /// Message is labelled "last."

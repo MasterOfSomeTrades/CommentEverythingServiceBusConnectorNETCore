@@ -13,7 +13,7 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
     <PackageReleaseNotes>Added support for Event Type in User Properties of messages on Topic.</PackageReleaseNotes>
-    <Version>2.2.1</Version>
+    <Version>2.2.2</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
