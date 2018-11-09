@@ -49,7 +49,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
         }
 
         protected abstract void ProcessMessage(IMessageSession session, Message messageAsObject, string messageAsUTF8);
-        protected abstract void ProcessMessagesWhenLastReceived(IMessageSession session, IList<string> listOfMessageAsUTF8InSession);
+        protected abstract void ProcessMessagesWhenLastReceived(IMessageSession session, IList<string> listOfMessageAsUTF8InSession, Message lastMessage = null);
 
         private async Task OnMessage(IMessageSession session, Message messageToHandle, CancellationToken lockToken) {
             try {
@@ -76,7 +76,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
                     if (msg.Label.Equals("last", StringComparison.InvariantCultureIgnoreCase)) {
                         try {
-                            ProcessMessagesWhenLastReceived(session, MessagesListedBySession[session.SessionId]);
+                            ProcessMessagesWhenLastReceived(session, MessagesListedBySession[session.SessionId], msg);
                         } catch (Exception ex) {
                             logger.LogError(ex.Message);
                             logger.LogDebug(ex.StackTrace);
@@ -87,8 +87,9 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                         }
                     }
                 }
-                await sLock.WaitAsync();
-                await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
+                //await sLock.WaitAsync();
+                //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
+                await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken));
 
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
