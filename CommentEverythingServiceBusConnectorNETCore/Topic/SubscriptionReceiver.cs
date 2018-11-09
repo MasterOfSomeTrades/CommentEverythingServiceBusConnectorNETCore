@@ -19,7 +19,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
 
-        SemaphoreSlim sLock = new SemaphoreSlim(5);
+        //SemaphoreSlim sLock = new SemaphoreSlim(5);
 
         protected SubscriptionReceiver() {
             // --- Use parameterized constructor
@@ -99,7 +99,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
         }
 
         Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs) {
-            sLock.Release();
+            //sLock.Release();
 
             var context = exceptionReceivedEventArgs.ExceptionReceivedContext;
             string exMsg = exceptionReceivedEventArgs.Exception.Message;
