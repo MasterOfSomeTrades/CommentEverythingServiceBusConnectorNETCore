@@ -83,10 +83,12 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                             logger.LogError(ex.Message);
                             logger.LogDebug(ex.StackTrace);
                             MessagesListedBySession.Remove(session.SessionId);
+                            logger.LogInformation("CLOSING session");
                             await session.CloseAsync();
                             throw new ApplicationException(ex.Message + ex.StackTrace);
                         } finally {
                             MessagesListedBySession.Remove(session.SessionId);
+                            logger.LogInformation("CLOSING session");
                             await session.CloseAsync();
                         }
                     }

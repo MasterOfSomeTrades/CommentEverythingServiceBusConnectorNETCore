@@ -12,11 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Fix session not completed.</PackageReleaseNotes>
-    <Version>2.4.3</Version>
+    <PackageReleaseNotes>Log close session for SubscriptionReceiver.</PackageReleaseNotes>
+    <Version>2.4.4</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>2.4.3.0</AssemblyVersion>
-    <FileVersion>2.4.3.0</FileVersion>
+    <AssemblyVersion>2.4.4.0</AssemblyVersion>
+    <FileVersion>2.4.4.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
