@@ -83,22 +83,21 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                             logger.LogError(ex.Message);
                             logger.LogDebug(ex.StackTrace);
                             MessagesListedBySession.Remove(session.SessionId);
-                            throw new ApplicationException(ex.Message);
+                            await session.CloseAsync();
+                            throw new ApplicationException(ex.Message + ex.StackTrace);
                         } finally {
                             MessagesListedBySession.Remove(session.SessionId);
+                            await session.CloseAsync();
                         }
                     }
                 }
                 //await sLock.WaitAsync();
                 //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
-                foreach (string token in fullList.Select(m => m.SystemProperties.LockToken)) {
-                    await subscriptionClient.CompleteAsync(token);
-                }
                 await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken));
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
-                throw new ApplicationException(ex.Message);
+                throw new ApplicationException(ex.Message + ex.StackTrace);
             }
         }
 
