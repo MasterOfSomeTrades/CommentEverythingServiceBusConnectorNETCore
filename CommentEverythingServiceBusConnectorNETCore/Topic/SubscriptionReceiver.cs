@@ -83,11 +83,21 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                             logger.LogError(ex.Message);
                             logger.LogDebug(ex.StackTrace);
                             MessagesListedBySession.Remove(session.SessionId);
+<<<<<<< Updated upstream
                             await session.CloseAsync();
                             throw new ApplicationException(ex.Message + ex.StackTrace);
                         } finally {
                             MessagesListedBySession.Remove(session.SessionId);
                             await session.CloseAsync();
+=======
+                            logger.LogInformation("CLOSING session");
+                            //await session.CloseAsync();
+                            //throw new ApplicationException(ex.Message + ex.StackTrace);
+                        } finally {
+                            MessagesListedBySession.Remove(session.SessionId);
+                            logger.LogInformation("CLOSING session");
+                            //await session.CloseAsync();
+>>>>>>> Stashed changes
                         }
                     }
                 }
@@ -97,7 +107,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
-                throw new ApplicationException(ex.Message + ex.StackTrace);
+                //throw new ApplicationException(ex.Message + ex.StackTrace);
             }
         }
 

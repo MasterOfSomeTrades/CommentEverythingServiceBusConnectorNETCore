@@ -12,11 +12,19 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
+<<<<<<< Updated upstream
     <PackageReleaseNotes>Fix session not completed.</PackageReleaseNotes>
     <Version>2.4.3</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <AssemblyVersion>2.4.3.0</AssemblyVersion>
     <FileVersion>2.4.3.0</FileVersion>
+=======
+    <PackageReleaseNotes>Log close session for SubscriptionReceiver.</PackageReleaseNotes>
+    <Version>2.4.6</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <AssemblyVersion>2.4.6.0</AssemblyVersion>
+    <FileVersion>2.4.6.0</FileVersion>
+>>>>>>> Stashed changes
   </PropertyGroup>
 
   <ItemGroup>
