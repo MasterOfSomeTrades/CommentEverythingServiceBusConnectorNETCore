@@ -18,6 +18,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
+        private int _concurrentSessions;
 
         //SemaphoreSlim sLock = new SemaphoreSlim(5);
 
@@ -25,10 +26,11 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             // --- Use parameterized constructor
         }
 
-        public SubscriptionReceiver(string connectionString, string topicName, string subscriptionName) {
+        public SubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 5) {
             ServiceBusConnectionString = connectionString;
             TopicName = topicName;
             SubscriptionName = subscriptionName;
+            _concurrentSessions = concurrentSessions;
 
             if (logger is null) {
                 logger = loggerFactory.CreateLogger<SubscriptionReceiver>();
@@ -40,7 +42,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
             var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
                 AutoComplete = false,
-                MaxConcurrentSessions = 5,
+                MaxConcurrentSessions = _concurrentSessions,
                 MessageWaitTimeout = TimeSpan.FromSeconds(30)
             };
 
