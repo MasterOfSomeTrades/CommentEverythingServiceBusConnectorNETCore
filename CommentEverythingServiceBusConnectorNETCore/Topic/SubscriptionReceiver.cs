@@ -91,8 +91,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                 }
                 //await sLock.WaitAsync();
                 //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
+                foreach (string token in fullList.Select(m => m.SystemProperties.LockToken)) {
+                    await subscriptionClient.CompleteAsync(token);
+                }
                 await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken));
-
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
