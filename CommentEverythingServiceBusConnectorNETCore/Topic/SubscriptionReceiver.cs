@@ -42,7 +42,8 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
             var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
                 AutoComplete = false,
-                MaxConcurrentSessions = _concurrentSessions
+                MaxConcurrentSessions = _concurrentSessions,
+                MaxAutoRenewDuration = TimeSpan.FromSeconds(29)
                 //MessageWaitTimeout = TimeSpan.FromSeconds(30)
             };
 
