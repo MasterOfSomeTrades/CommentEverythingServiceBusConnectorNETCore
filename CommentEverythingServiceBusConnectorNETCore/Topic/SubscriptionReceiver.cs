@@ -85,7 +85,6 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                             logger.LogDebug(ex.StackTrace);
                         } finally {
                             MessagesListedBySession.Remove(session.SessionId);
-                            await session.CloseAsync();
                         }
                     }
                 }
