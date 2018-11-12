@@ -42,8 +42,8 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
             var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
                 AutoComplete = false,
-                MaxConcurrentSessions = _concurrentSessions,
-                MessageWaitTimeout = TimeSpan.FromSeconds(30)
+                MaxConcurrentSessions = _concurrentSessions
+                //MessageWaitTimeout = TimeSpan.FromSeconds(30)
             };
 
             subscriptionClient.PrefetchCount = 250;
