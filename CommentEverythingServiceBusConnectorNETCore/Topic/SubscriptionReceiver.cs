@@ -26,6 +26,21 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             // --- Use parameterized constructor
         }
 
+        public void Reconnect() {
+            subscriptionClient.CloseAsync();
+
+            subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
+
+            var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
+                AutoComplete = false,
+                MaxConcurrentSessions = _concurrentSessions
+                //MessageWaitTimeout = TimeSpan.FromSeconds(30)
+            };
+
+            subscriptionClient.PrefetchCount = 250;
+            subscriptionClient.RegisterSessionHandler(OnMessage, sessionOptions);
+        }
+
         public SubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 5) {
             ServiceBusConnectionString = connectionString;
             TopicName = topicName;
@@ -91,14 +106,6 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                 //await sLock.WaitAsync();
                 //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
                 await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken));
-
-                var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
-                    AutoComplete = false,
-                    MaxConcurrentSessions = _concurrentSessions,
-                    MaxAutoRenewDuration = TimeSpan.FromSeconds(29)
-                    //MessageWaitTimeout = TimeSpan.FromSeconds(30)
-                };
-                subscriptionClient.RegisterSessionHandler(OnMessage, sessionOptions);
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
