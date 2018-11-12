@@ -27,18 +27,20 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
         }
 
         public void Reconnect() {
-            subscriptionClient.CloseAsync();
+            if (MessagesListedBySession.Count < 1) {
+                subscriptionClient.CloseAsync();
 
-            subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
+                subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
 
-            var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
-                AutoComplete = false,
-                MaxConcurrentSessions = _concurrentSessions
-                //MessageWaitTimeout = TimeSpan.FromSeconds(30)
-            };
+                var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
+                    AutoComplete = false,
+                    MaxConcurrentSessions = _concurrentSessions
+                    //MessageWaitTimeout = TimeSpan.FromSeconds(30)
+                };
 
-            subscriptionClient.PrefetchCount = 250;
-            subscriptionClient.RegisterSessionHandler(OnMessage, sessionOptions);
+                subscriptionClient.PrefetchCount = 250;
+                subscriptionClient.RegisterSessionHandler(OnMessage, sessionOptions);
+            }
         }
 
         public SubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 5) {
