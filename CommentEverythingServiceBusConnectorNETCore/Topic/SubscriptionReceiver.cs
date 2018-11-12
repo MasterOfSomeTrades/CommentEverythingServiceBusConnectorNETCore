@@ -82,28 +82,23 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                         } catch (Exception ex) {
                             logger.LogError(ex.Message);
                             logger.LogDebug(ex.StackTrace);
-                            MessagesListedBySession.Remove(session.SessionId);
-<<<<<<< Updated upstream
-                            await session.CloseAsync();
-                            throw new ApplicationException(ex.Message + ex.StackTrace);
                         } finally {
                             MessagesListedBySession.Remove(session.SessionId);
                             await session.CloseAsync();
-=======
-                            logger.LogInformation("CLOSING session");
-                            //await session.CloseAsync();
-                            //throw new ApplicationException(ex.Message + ex.StackTrace);
-                        } finally {
-                            MessagesListedBySession.Remove(session.SessionId);
-                            logger.LogInformation("CLOSING session");
-                            //await session.CloseAsync();
->>>>>>> Stashed changes
                         }
                     }
                 }
                 //await sLock.WaitAsync();
                 //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
                 await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken));
+
+                var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
+                    AutoComplete = false,
+                    MaxConcurrentSessions = _concurrentSessions,
+                    MaxAutoRenewDuration = TimeSpan.FromSeconds(29)
+                    //MessageWaitTimeout = TimeSpan.FromSeconds(30)
+                };
+                subscriptionClient.RegisterSessionHandler(OnMessage, sessionOptions);
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
