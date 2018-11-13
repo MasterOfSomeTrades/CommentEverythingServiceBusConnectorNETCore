@@ -56,10 +56,17 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
         public void Listen() {
             subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
+            RetryPolicy policy = new RetryExponential(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(29), 10);
+            subscriptionClient.ServiceBusConnection.RetryPolicy = policy;
 
             var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
                 AutoComplete = false,
+<<<<<<< Updated upstream
                 MaxConcurrentSessions = _concurrentSessions
+=======
+                MaxConcurrentSessions = _concurrentSessions,
+                MaxAutoRenewDuration = TimeSpan.FromSeconds(20)
+>>>>>>> Stashed changes
                 //MessageWaitTimeout = TimeSpan.FromSeconds(30)
             };
 
