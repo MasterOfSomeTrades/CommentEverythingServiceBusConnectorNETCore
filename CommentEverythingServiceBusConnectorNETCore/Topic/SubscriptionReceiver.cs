@@ -19,6 +19,8 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
         private int _concurrentSessions;
+        private int _sessionsInitializedCount = 0;
+        private bool _autoTryReconnect = false;
 
         //SemaphoreSlim sLock = new SemaphoreSlim(5);
 
@@ -26,8 +28,9 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             // --- Use parameterized constructor
         }
 
-        public async void Reconnect() {
-            if (subscriptionClient.ServiceBusConnection.IsClosedOrClosing) {
+        public async void TryReconnect() {
+            if (MessagesListedBySession.Count == 0 && _sessionsInitializedCount >= _concurrentSessions) {
+                _sessionsInitializedCount = 0;
                 try {
                     await subscriptionClient.CloseAsync();
                 } catch (Exception ex) {
@@ -46,11 +49,12 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             }
         }
 
-        public SubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 5) {
+        public SubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 5, bool autoTryReconnect = false) {
             ServiceBusConnectionString = connectionString;
             TopicName = topicName;
             SubscriptionName = subscriptionName;
             _concurrentSessions = concurrentSessions;
+            _autoTryReconnect = autoTryReconnect;
 
             if (logger is null) {
                 logger = loggerFactory.CreateLogger<SubscriptionReceiver>();
@@ -71,6 +75,13 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
             subscriptionClient.PrefetchCount = 250;
             subscriptionClient.RegisterSessionHandler(OnMessage, sessionOptions);
+
+            if (_autoTryReconnect) {
+                while (true) {
+                    Task.Delay(10000).GetAwaiter().GetResult();
+                    TryReconnect();
+                }
+            }
         }
 
         protected abstract void ProcessMessage(IMessageSession session, Message messageAsObject, string messageAsUTF8);
@@ -90,6 +101,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
                 foreach (Message msg in fullList) {
                     if (!MessagesListedBySession.ContainsKey(session.SessionId)) {
+                        _sessionsInitializedCount++;
                         MessagesListedBySession.TryAdd(session.SessionId, new List<string>());
                     }
 
@@ -107,7 +119,6 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                             logger.LogDebug(ex.StackTrace);
                         } finally {
                             MessagesListedBySession.Remove(session.SessionId);
-                            await session.CloseAsync();
                         }
                     }
                 }
