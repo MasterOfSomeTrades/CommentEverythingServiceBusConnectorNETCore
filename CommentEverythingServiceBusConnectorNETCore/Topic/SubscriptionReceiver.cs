@@ -26,10 +26,13 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             // --- Use parameterized constructor
         }
 
-        public void Reconnect() {
-            if (MessagesListedBySession.Count < 1) {
-                subscriptionClient.CloseAsync();
-
+        public async void Reconnect() {
+            if (subscriptionClient.ServiceBusConnection.IsClosedOrClosing) {
+                try {
+                    await subscriptionClient.CloseAsync();
+                } catch (Exception ex) {
+                    logger.LogWarning(ex.Message);
+                }
                 subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
 
                 var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
@@ -61,12 +64,8 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
 
             var sessionOptions = new SessionHandlerOptions(ExceptionReceivedHandler) {
                 AutoComplete = false,
-<<<<<<< Updated upstream
-                MaxConcurrentSessions = _concurrentSessions
-=======
                 MaxConcurrentSessions = _concurrentSessions,
                 MaxAutoRenewDuration = TimeSpan.FromSeconds(20)
->>>>>>> Stashed changes
                 //MessageWaitTimeout = TimeSpan.FromSeconds(30)
             };
 
