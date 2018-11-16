@@ -70,8 +70,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
             var sessionOptions = new MessageHandlerOptions(ExceptionReceivedHandler) {
                 AutoComplete = false,
-                MaxConcurrentCalls = _concurrentSessions,
-                MaxAutoRenewDuration = TimeSpan.FromSeconds(20)
+                MaxConcurrentCalls = _concurrentSessions
                 //MessageWaitTimeout = TimeSpan.FromSeconds(30)
             };
 
