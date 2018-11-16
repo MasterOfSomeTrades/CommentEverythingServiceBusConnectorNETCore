@@ -102,6 +102,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
                 ProcessMessage(messageToHandle, dataJSON);
 
+                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
+
                 if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
                     try {
                         ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId], messageToHandle);
@@ -115,7 +117,6 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 }
                 //await sLock.WaitAsync();
                 //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
-                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
