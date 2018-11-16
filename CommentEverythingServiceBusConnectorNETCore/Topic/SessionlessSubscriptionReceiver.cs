@@ -91,7 +91,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
         private async Task OnMessage(Message messageToHandle, CancellationToken lockToken) {
             try {
-                string groupId = messageToHandle.UserProperties["CorrelationId"].ToString();
+                string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
 
                 if (!MessagesListedByGroup.ContainsKey(groupId)) {
                     MessagesListedByGroup.TryAdd(groupId, new ConcurrentBag<string>());
