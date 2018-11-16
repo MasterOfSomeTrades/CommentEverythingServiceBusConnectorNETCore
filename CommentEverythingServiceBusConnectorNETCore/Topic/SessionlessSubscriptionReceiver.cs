@@ -51,7 +51,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             }
         }
 
-        public SessionlessSubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 5, bool autoTryReconnect = false) {
+        public SessionlessSubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 10, bool autoTryReconnect = false) {
             ServiceBusConnectionString = connectionString;
             TopicName = topicName;
             SubscriptionName = subscriptionName;
