@@ -113,9 +113,12 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     _processedSessionsDictionary.TryAdd(groupId, 0);
                 }
 
+                bool messageAdded = false;
                 if (!_processedMessagesDictionary[groupId].ContainsKey(messageToHandle.MessageId)) {
-                    _processedMessagesDictionary[groupId].TryAdd(messageToHandle.MessageId, 1);
+                    messageAdded = _processedMessagesDictionary[groupId].TryAdd(messageToHandle.MessageId, 1);
+                }
 
+                if (messageAdded) {
                     string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
 
                     MessagesListedByGroup[groupId].Add(dataJSON);

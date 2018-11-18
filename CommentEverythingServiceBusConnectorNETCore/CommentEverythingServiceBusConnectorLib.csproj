@@ -12,11 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Prevent duplicate processing of messages in sessionless implementation.</PackageReleaseNotes>
-    <Version>2.8.0</Version>
+    <PackageReleaseNotes>Fix duplicate message processing.</PackageReleaseNotes>
+    <Version>2.8.1</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>2.8.0.0</AssemblyVersion>
-    <FileVersion>2.8.0.0</FileVersion>
+    <AssemblyVersion>2.8.1.0</AssemblyVersion>
+    <FileVersion>2.8.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
