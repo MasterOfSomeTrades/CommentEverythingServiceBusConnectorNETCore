@@ -17,6 +17,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         private string SubscriptionName;
         private ConcurrentDictionary<string, ConcurrentBag<string>> MessagesListedByGroup = new ConcurrentDictionary<string, ConcurrentBag<string>>();
 
+        private ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _processedMessagesDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, byte>>();
+        private ConcurrentDictionary<string, short> _processedSessionsDictionary = new ConcurrentDictionary<string, short>();
+
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
         private int _concurrentSessions;
@@ -33,6 +36,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         public async void TryReconnect() {
             if (MessagesListedByGroup.Count == 0 && _sessionsInitializedCount >= _concurrentSessions) {
                 _sessionsInitializedCount = 0;
+                _processedSessionsDictionary = new ConcurrentDictionary<string, short>();
                 try {
                     await subscriptionClient.CloseAsync();
                 } catch (Exception ex) {
@@ -52,7 +56,15 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             }
         }
 
-        
+        /// <summary>
+        /// Constructor for SessionlessSubscriptionReceiver.
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="topicName"></param>
+        /// <param name="subscriptionName"></param>
+        /// <param name="concurrentSessions"></param>
+        /// <param name="autoTryReconnect"></param>
+        /// <param name="messageLockMinutes"></param>
         public SessionlessSubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 10, bool autoTryReconnect = false, int messageLockMinutes = 15) {
             ServiceBusConnectionString = connectionString;
             TopicName = topicName;
@@ -95,31 +107,49 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             try {
                 string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
 
-                if (!MessagesListedByGroup.ContainsKey(groupId)) {
+                if (!_processedSessionsDictionary.ContainsKey(groupId)) {
                     MessagesListedByGroup.TryAdd(groupId, new ConcurrentBag<string>());
+                    _processedMessagesDictionary.TryAdd(groupId, new ConcurrentDictionary<string, byte>());
+                    _processedSessionsDictionary.TryAdd(groupId, 0);
                 }
 
-                string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
+                if (!_processedMessagesDictionary[groupId].ContainsKey(messageToHandle.MessageId)) {
+                    _processedMessagesDictionary[groupId].TryAdd(messageToHandle.MessageId, 1);
 
-                MessagesListedByGroup[groupId].Add(dataJSON);
+                    string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
 
-                ProcessMessage(messageToHandle, dataJSON);
+                    MessagesListedByGroup[groupId].Add(dataJSON);
 
-                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
+                    ProcessMessage(messageToHandle, dataJSON);
 
-                if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
-                    try {
-                        ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId], messageToHandle);
-                    } catch (Exception ex) {
-                        logger.LogError(ex.Message);
-                        logger.LogDebug(ex.StackTrace);
-                    } finally {
-                        ConcurrentBag<string> removed = new ConcurrentBag<string>();
-                        MessagesListedByGroup.TryRemove(groupId, out removed);
+                    await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
+
+                    if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
+                        if (MessagesListedByGroup[groupId].Count > int.Parse(messageToHandle.UserProperties["Count"].ToString())) {
+                            throw new ApplicationException(String.Format("Duplicate message processing occurred for group ID {0}", groupId));
+                        }
+                        try {
+                            if (_processedSessionsDictionary[groupId] == 0) {
+                                _processedSessionsDictionary[groupId]++;
+                                ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId], messageToHandle);
+                            } else {
+                                logger.LogWarning(String.Format("Duplicate batch processing (Group={0})", groupId));
+                            }
+                        } catch (Exception ex) {
+                            logger.LogError(ex.Message);
+                            logger.LogDebug(ex.StackTrace);
+                        } finally {
+                            ConcurrentBag<string> removed = new ConcurrentBag<string>();
+                            ConcurrentDictionary<string, byte> removedDictionary = new ConcurrentDictionary<string, byte>();
+                            MessagesListedByGroup.TryRemove(groupId, out removed);
+                            _processedMessagesDictionary.TryRemove(groupId, out removedDictionary);
+                        }
                     }
+                    //await sLock.WaitAsync();
+                    //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
+                } else {
+                    logger.LogWarning(String.Format("Duplicate message processing (Group={0} Message={1})", groupId, messageToHandle.MessageId));
                 }
-                //await sLock.WaitAsync();
-                //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
                 logger.LogDebug(ex.StackTrace);
