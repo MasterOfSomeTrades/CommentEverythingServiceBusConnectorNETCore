@@ -15,7 +15,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         private string ServiceBusConnectionString;
         private string TopicName;
         private string SubscriptionName;
-        private ConcurrentDictionary<string, ConcurrentBag<string>> MessagesListedByGroup = new ConcurrentDictionary<string, ConcurrentBag<string>>();
+        private ConcurrentDictionary<string, ConcurrentDictionary<string, string>> MessagesListedByGroup = new ConcurrentDictionary<string, ConcurrentDictionary<string, string>>();
 
         private ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _processedMessagesDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, byte>>();
         private ConcurrentDictionary<string, short> _processedSessionsDictionary = new ConcurrentDictionary<string, short>();
@@ -101,14 +101,14 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         }
 
         protected abstract void ProcessMessage(Message messageAsObject, string messageAsUTF8);
-        protected abstract void ProcessMessagesWhenLastReceived(ConcurrentBag<string> listOfMessageAsUTF8InSession, Message lastMessage = null);
+        protected abstract void ProcessMessagesWhenLastReceived(IList<string> listOfMessageAsUTF8InSession, Message lastMessage = null);
 
         private async Task OnMessage(Message messageToHandle, CancellationToken lockToken) {
             try {
                 string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
 
                 if (!_processedSessionsDictionary.ContainsKey(groupId)) {
-                    MessagesListedByGroup.TryAdd(groupId, new ConcurrentBag<string>());
+                    MessagesListedByGroup.TryAdd(groupId, new ConcurrentDictionary<string, string>());
                     _processedMessagesDictionary.TryAdd(groupId, new ConcurrentDictionary<string, byte>());
                     _processedSessionsDictionary.TryAdd(groupId, 0);
                 }
@@ -121,7 +121,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 if (messageAdded) {
                     string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
 
-                    MessagesListedByGroup[groupId].Add(dataJSON);
+                    MessagesListedByGroup[groupId].TryAdd(messageToHandle.MessageId, dataJSON);
 
                     ProcessMessage(messageToHandle, dataJSON);
 
@@ -134,7 +134,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                         try {
                             if (_processedSessionsDictionary[groupId] == 0) {
                                 _processedSessionsDictionary[groupId]++;
-                                ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId], messageToHandle);
+                                ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId].Values.ToList(), messageToHandle);
                             } else {
                                 logger.LogWarning(String.Format("Duplicate batch processing (Group={0})", groupId));
                             }
@@ -142,7 +142,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                             logger.LogError(ex.Message);
                             logger.LogDebug(ex.StackTrace);
                         } finally {
-                            ConcurrentBag<string> removed = new ConcurrentBag<string>();
+                            ConcurrentDictionary<string, string> removed = new ConcurrentDictionary<string, string>();
                             ConcurrentDictionary<string, byte> removedDictionary = new ConcurrentDictionary<string, byte>();
                             MessagesListedByGroup.TryRemove(groupId, out removed);
                             _processedMessagesDictionary.TryRemove(groupId, out removedDictionary);
