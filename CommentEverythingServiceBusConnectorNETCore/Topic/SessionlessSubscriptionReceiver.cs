@@ -22,6 +22,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         private int _concurrentSessions;
         private int _sessionsInitializedCount = 0;
         private bool _autoTryReconnect = false;
+        private int _messageLockMinutes;
 
         //SemaphoreSlim sLock = new SemaphoreSlim(5);
 
@@ -42,7 +43,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 var sessionOptions = new MessageHandlerOptions(ExceptionReceivedHandler) {
                     AutoComplete = false,
                     MaxConcurrentCalls = _concurrentSessions, 
-                    MaxAutoRenewDuration = TimeSpan.FromMinutes(16)
+                    MaxAutoRenewDuration = TimeSpan.FromMinutes(_messageLockMinutes)
                     //MessageWaitTimeout = TimeSpan.FromSeconds(30)
                 };
 
@@ -51,12 +52,14 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             }
         }
 
-        public SessionlessSubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 10, bool autoTryReconnect = false) {
+        
+        public SessionlessSubscriptionReceiver(string connectionString, string topicName, string subscriptionName, int concurrentSessions = 10, bool autoTryReconnect = false, int messageLockMinutes = 15) {
             ServiceBusConnectionString = connectionString;
             TopicName = topicName;
             SubscriptionName = subscriptionName;
             _concurrentSessions = concurrentSessions;
             _autoTryReconnect = autoTryReconnect;
+            _messageLockMinutes = messageLockMinutes;
 
             if (logger is null) {
                 logger = loggerFactory.CreateLogger<SessionlessSubscriptionReceiver>();
@@ -70,8 +73,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
             var sessionOptions = new MessageHandlerOptions(ExceptionReceivedHandler) {
                 AutoComplete = false,
-                MaxConcurrentCalls = _concurrentSessions
-                //MessageWaitTimeout = TimeSpan.FromSeconds(30)
+                MaxConcurrentCalls = _concurrentSessions,
+                MaxAutoRenewDuration = TimeSpan.FromMinutes(_messageLockMinutes)
             };
 
             subscriptionClient.PrefetchCount = 250;
