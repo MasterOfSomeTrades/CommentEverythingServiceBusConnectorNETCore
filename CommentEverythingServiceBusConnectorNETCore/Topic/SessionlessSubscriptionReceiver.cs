@@ -107,9 +107,13 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             try {
                 string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
 
-                if (!_processedSessionsDictionary.ContainsKey(groupId)) {
+                if (!MessagesListedByGroup.ContainsKey(groupId)) {
                     MessagesListedByGroup.TryAdd(groupId, new ConcurrentDictionary<string, string>());
+                }
+                if (!_processedMessagesDictionary.ContainsKey(groupId)) {
                     _processedMessagesDictionary.TryAdd(groupId, new ConcurrentDictionary<string, byte>());
+                }
+                if (!_processedSessionsDictionary.ContainsKey(groupId)) {
                     _processedSessionsDictionary.TryAdd(groupId, 0);
                 }
 
