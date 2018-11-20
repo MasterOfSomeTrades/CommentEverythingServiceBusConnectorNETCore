@@ -144,8 +144,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                             logger.LogWarning(String.Format("Duplicate batch processing (Group={0})", groupId));
                         }
                     } catch (Exception ex) {
-                        logger.LogError(ex.Message);
-                        logger.LogDebug(ex.StackTrace);
+                        logger.LogError(ex.Message + ex.StackTrace);
                     } finally {
                         ConcurrentDictionary<string, string> removed = new ConcurrentDictionary<string, string>();
                         ConcurrentDictionary<string, byte> removedDictionary = new ConcurrentDictionary<string, byte>();
@@ -154,8 +153,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     }
                 }
             } catch (Exception ex) {
-                logger.LogError(ex.Message);
-                logger.LogDebug(ex.StackTrace);
+                logger.LogError(ex.Message + ex.StackTrace);
                 //throw new ApplicationException(ex.Message + ex.StackTrace);
             }
         }
