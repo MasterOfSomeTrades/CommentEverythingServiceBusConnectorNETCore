@@ -124,34 +124,34 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     MessagesListedByGroup[groupId].TryAdd(messageToHandle.MessageId, dataJSON);
 
                     ProcessMessage(messageToHandle, dataJSON);
-
-                    await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
-
-                    if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
-                        if (MessagesListedByGroup[groupId].Count > int.Parse(messageToHandle.UserProperties["Count"].ToString())) {
-                            throw new ApplicationException(String.Format("Duplicate message processing occurred for group ID {0}", groupId));
-                        }
-                        try {
-                            if (_processedSessionsDictionary[groupId] == 0) {
-                                _processedSessionsDictionary[groupId]++;
-                                ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId].Values.ToList(), messageToHandle);
-                            } else {
-                                logger.LogWarning(String.Format("Duplicate batch processing (Group={0})", groupId));
-                            }
-                        } catch (Exception ex) {
-                            logger.LogError(ex.Message);
-                            logger.LogDebug(ex.StackTrace);
-                        } finally {
-                            ConcurrentDictionary<string, string> removed = new ConcurrentDictionary<string, string>();
-                            ConcurrentDictionary<string, byte> removedDictionary = new ConcurrentDictionary<string, byte>();
-                            MessagesListedByGroup.TryRemove(groupId, out removed);
-                            _processedMessagesDictionary.TryRemove(groupId, out removedDictionary);
-                        }
-                    }
                     //await sLock.WaitAsync();
                     //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
                 } else {
                     logger.LogWarning(String.Format("Duplicate message processing (Group={0} Message={1})", groupId, messageToHandle.MessageId));
+                }
+
+                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
+
+                if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
+                    if (MessagesListedByGroup[groupId].Count > int.Parse(messageToHandle.UserProperties["Count"].ToString())) {
+                        throw new ApplicationException(String.Format("Duplicate message processing occurred for group ID {0}", groupId));
+                    }
+                    try {
+                        if (_processedSessionsDictionary[groupId] == 0) {
+                            _processedSessionsDictionary[groupId]++;
+                            ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId].Values.ToList(), messageToHandle);
+                        } else {
+                            logger.LogWarning(String.Format("Duplicate batch processing (Group={0})", groupId));
+                        }
+                    } catch (Exception ex) {
+                        logger.LogError(ex.Message);
+                        logger.LogDebug(ex.StackTrace);
+                    } finally {
+                        ConcurrentDictionary<string, string> removed = new ConcurrentDictionary<string, string>();
+                        ConcurrentDictionary<string, byte> removedDictionary = new ConcurrentDictionary<string, byte>();
+                        MessagesListedByGroup.TryRemove(groupId, out removed);
+                        _processedMessagesDictionary.TryRemove(groupId, out removedDictionary);
+                    }
                 }
             } catch (Exception ex) {
                 logger.LogError(ex.Message);
