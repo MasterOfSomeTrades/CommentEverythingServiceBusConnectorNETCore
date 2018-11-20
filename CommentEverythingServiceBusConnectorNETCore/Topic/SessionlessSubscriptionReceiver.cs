@@ -134,8 +134,6 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     logger.LogWarning(String.Format("Duplicate message processing (Group={0} Message={1})", groupId, messageToHandle.MessageId));
                 }
 
-                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
-
                 logger.LogInformation(String.Format("--------------- NUMBER OF MESSAGES PROCESSED = {0}", MessagesListedByGroup[groupId].Count.ToString()));
                 if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
                     if (MessagesListedByGroup[groupId].Count > int.Parse(messageToHandle.UserProperties["Count"].ToString())) {
@@ -157,6 +155,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                         _processedMessagesDictionary.TryRemove(groupId, out removedDictionary);
                     }
                 }
+
+                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
             } catch (Exception ex) {
                 logger.LogError(ex.Message + ex.StackTrace);
                 //throw new ApplicationException(ex.Message + ex.StackTrace);
