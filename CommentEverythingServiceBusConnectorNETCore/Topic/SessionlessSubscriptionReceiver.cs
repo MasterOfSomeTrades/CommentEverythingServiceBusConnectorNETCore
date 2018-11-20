@@ -136,6 +136,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
                 await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
 
+                logger.LogInformation(String.Format("--------------- NUMBER OF MESSAGES PROCESSED = {0}", MessagesListedByGroup[groupId].Count.ToString()));
                 if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
                     if (MessagesListedByGroup[groupId].Count > int.Parse(messageToHandle.UserProperties["Count"].ToString())) {
                         throw new ApplicationException(String.Format("Duplicate message processing occurred for group ID {0}", groupId));
