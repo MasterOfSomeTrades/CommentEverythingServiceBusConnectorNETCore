@@ -113,9 +113,14 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
                 _messageHolder[groupId].Add(dataJSON);
 
-                logger.LogInformation(String.Format("-------------- Number of messages processed: {0} for session {1}", _messageHolder[groupId].Count.ToString(), groupId));
+                int processedMessagesCount = _messageHolder[groupId].Count;
+                int totalMessagesCount = int.Parse(messageToHandle.UserProperties["Count"].ToString());
+
+                ProcessMessage(messageToHandle, dataJSON);
 
                 await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
+
+                logger.LogInformation(String.Format("------------------ processed message {0} of {1}", processedMessagesCount.ToString(), totalMessagesCount.ToString()));
             } catch (Exception ex) {
                 logger.LogInformation(ex.Message + ex.StackTrace);
                 await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
