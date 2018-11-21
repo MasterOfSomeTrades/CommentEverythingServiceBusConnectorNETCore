@@ -120,6 +120,11 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
                 await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
 
+                if (processedMessagesCount == totalMessagesCount) {
+                    logger.LogInformation(String.Format("=============== PROCESSING GROUP OF {0} MESSAGES", totalMessagesCount.ToString()));
+                    ProcessMessagesWhenLastReceived(_messageHolder[groupId].ToList(), messageToHandle);
+                }
+
                 logger.LogInformation(String.Format("------------------ processed message {0} of {1}", processedMessagesCount.ToString(), totalMessagesCount.ToString()));
             } catch (Exception ex) {
                 logger.LogInformation(ex.Message + ex.StackTrace);
