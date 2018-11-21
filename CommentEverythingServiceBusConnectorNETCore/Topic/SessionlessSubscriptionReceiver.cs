@@ -27,6 +27,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         private bool _autoTryReconnect = false;
         private int _messageLockMinutes;
 
+        private ConcurrentDictionary<string, HashSet<string>> _messageHolder = new ConcurrentDictionary<string, HashSet<string>>();
+
         //SemaphoreSlim sLock = new SemaphoreSlim(5);
 
         protected SessionlessSubscriptionReceiver() {
@@ -106,6 +108,20 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         private async Task OnMessage(Message messageToHandle, CancellationToken lockToken) {
             try {
                 string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
+                _messageHolder.TryAdd(groupId, new HashSet<string>());
+
+                string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
+                _messageHolder[groupId].Add(dataJSON);
+
+                logger.LogInformation(String.Format("-------------- Number of messages processed: {0} for session {1}", _messageHolder[groupId].Count.ToString(), groupId));
+
+                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
+            } catch (Exception ex) {
+                logger.LogInformation(ex.Message + ex.StackTrace);
+                await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
+            }
+            /*try {
+                string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
 
                 if (!MessagesListedByGroup.ContainsKey(groupId)) {
                     MessagesListedByGroup.TryAdd(groupId, new ConcurrentDictionary<string, string>());
@@ -160,7 +176,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             } catch (Exception ex) {
                 logger.LogError(ex.Message + ex.StackTrace);
                 //throw new ApplicationException(ex.Message + ex.StackTrace);
-            }
+            }*/
         }
 
         Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs) {
