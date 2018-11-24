@@ -111,15 +111,17 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 _messageHolder.TryAdd(groupId, new HashSet<string>());
 
                 string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
-                _messageHolder[groupId].Add(dataJSON);
-
-                IList<string> messagesList = _messageHolder[groupId].ToList();
-                int processedMessagesCount = _messageHolder[groupId].Count;
+                
                 int totalMessagesCount = int.Parse(messageToHandle.UserProperties["Count"].ToString());
 
                 ProcessMessage(messageToHandle, dataJSON);
 
                 await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
+
+                _messageHolder[groupId].Add(dataJSON);
+
+                IList<string> messagesList = _messageHolder[groupId].ToList();
+                int processedMessagesCount = _messageHolder[groupId].Count;
 
                 if (processedMessagesCount == totalMessagesCount) {
                     logger.LogInformation(String.Format("=============== PROCESSING GROUP OF {0} MESSAGES", totalMessagesCount.ToString()));
