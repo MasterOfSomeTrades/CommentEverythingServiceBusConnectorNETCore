@@ -113,6 +113,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
                 _messageHolder[groupId].Add(dataJSON);
 
+                IList<string> messagesList = _messageHolder[groupId].ToList();
                 int processedMessagesCount = _messageHolder[groupId].Count;
                 int totalMessagesCount = int.Parse(messageToHandle.UserProperties["Count"].ToString());
 
@@ -122,7 +123,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
                 if (processedMessagesCount == totalMessagesCount) {
                     logger.LogInformation(String.Format("=============== PROCESSING GROUP OF {0} MESSAGES", totalMessagesCount.ToString()));
-                    ProcessMessagesWhenLastReceived(_messageHolder[groupId].ToList(), messageToHandle);
+                    ProcessMessagesWhenLastReceived(messagesList, messageToHandle);
                 }
 
                 logger.LogInformation(String.Format("------------------ processed message {0} of {1}", processedMessagesCount.ToString(), totalMessagesCount.ToString()));
