@@ -12,11 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Fixed messages count defect</PackageReleaseNotes>
-    <Version>2.9.4</Version>
+    <PackageReleaseNotes>Added Collection IDs in log messages.</PackageReleaseNotes>
+    <Version>2.9.5</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>2.9.4.0</AssemblyVersion>
-    <FileVersion>2.9.4.0</FileVersion>
+    <AssemblyVersion>2.9.5.0</AssemblyVersion>
+    <FileVersion>2.9.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

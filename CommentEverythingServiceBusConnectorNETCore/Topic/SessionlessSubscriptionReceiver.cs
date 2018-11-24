@@ -124,77 +124,18 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 int processedMessagesCount = _messageHolder[groupId].Count;
 
                 if (processedMessagesCount == totalMessagesCount) {
-                    logger.LogInformation(String.Format("=============== PROCESSING GROUP OF {0} MESSAGES", totalMessagesCount.ToString()));
+                    logger.LogInformation(String.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
                     ProcessMessagesWhenLastReceived(messagesList, messageToHandle);
                 }
 
-                logger.LogInformation(String.Format("------------------ processed message {0} of {1}", processedMessagesCount.ToString(), totalMessagesCount.ToString()));
+                logger.LogInformation(String.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
             } catch (Exception ex) {
                 logger.LogInformation(ex.Message + ex.StackTrace);
                 await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
             }
-            /*try {
-                string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
-
-                if (!MessagesListedByGroup.ContainsKey(groupId)) {
-                    MessagesListedByGroup.TryAdd(groupId, new ConcurrentDictionary<string, string>());
-                }
-                if (!_processedMessagesDictionary.ContainsKey(groupId)) {
-                    _processedMessagesDictionary.TryAdd(groupId, new ConcurrentDictionary<string, byte>());
-                }
-                if (!_processedSessionsDictionary.ContainsKey(groupId)) {
-                    _processedSessionsDictionary.TryAdd(groupId, 0);
-                }
-
-                bool messageAdded = false;
-                if (!_processedMessagesDictionary[groupId].ContainsKey(messageToHandle.MessageId)) {
-                    messageAdded = _processedMessagesDictionary[groupId].TryAdd(messageToHandle.MessageId, 1);
-                }
-
-                if (messageAdded) {
-                    string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
-
-                    MessagesListedByGroup[groupId].TryAdd(messageToHandle.MessageId, dataJSON);
-
-                    ProcessMessage(messageToHandle, dataJSON);
-                    //await sLock.WaitAsync();
-                    //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
-                } else {
-                    logger.LogWarning(String.Format("Duplicate message processing (Group={0} Message={1})", groupId, messageToHandle.MessageId));
-                }
-
-                logger.LogInformation(String.Format("--------------- NUMBER OF MESSAGES PROCESSED = {0}", MessagesListedByGroup[groupId].Count.ToString()));
-                if (int.Parse(messageToHandle.UserProperties["Count"].ToString()) <= MessagesListedByGroup[groupId].Count()) {
-                    if (MessagesListedByGroup[groupId].Count > int.Parse(messageToHandle.UserProperties["Count"].ToString())) {
-                        throw new ApplicationException(String.Format("Duplicate message processing occurred for group ID {0}", groupId));
-                    }
-                    try {
-                        if (_processedSessionsDictionary[groupId] == 0) {
-                            _processedSessionsDictionary[groupId]++;
-                            ProcessMessagesWhenLastReceived(MessagesListedByGroup[groupId].Values.ToList(), messageToHandle);
-                        } else {
-                            logger.LogWarning(String.Format("Duplicate batch processing (Group={0})", groupId));
-                        }
-                    } catch (Exception ex) {
-                        logger.LogError(ex.Message + ex.StackTrace);
-                    } finally {
-                        ConcurrentDictionary<string, string> removed = new ConcurrentDictionary<string, string>();
-                        ConcurrentDictionary<string, byte> removedDictionary = new ConcurrentDictionary<string, byte>();
-                        MessagesListedByGroup.TryRemove(groupId, out removed);
-                        _processedMessagesDictionary.TryRemove(groupId, out removedDictionary);
-                    }
-                }
-
-                await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
-            } catch (Exception ex) {
-                logger.LogError(ex.Message + ex.StackTrace);
-                //throw new ApplicationException(ex.Message + ex.StackTrace);
-            }*/
         }
 
         Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs) {
-            //sLock.Release();
-
             var context = exceptionReceivedEventArgs.ExceptionReceivedContext;
             string exMsg = exceptionReceivedEventArgs.Exception.Message;
             string stackTrace = exceptionReceivedEventArgs.Exception.StackTrace;
