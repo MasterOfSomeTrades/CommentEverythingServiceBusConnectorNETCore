@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using CommentEverythingServiceBusConnectorLib.Queue;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -126,12 +127,15 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 if (processedMessagesCount == totalMessagesCount) {
                     logger.LogInformation(String.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
                     ProcessMessagesWhenLastReceived(messagesList, messageToHandle);
+                    HashSet<string> removed = new HashSet<string>();
+                    _messageHolder.TryRemove(groupId, out removed);
                 }
 
                 logger.LogInformation(String.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
             } catch (Exception ex) {
-                logger.LogInformation(ex.Message + ex.StackTrace);
                 await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
+
+                throw new ApplicationException(ex.Message + ex.StackTrace);
             }
         }
 
