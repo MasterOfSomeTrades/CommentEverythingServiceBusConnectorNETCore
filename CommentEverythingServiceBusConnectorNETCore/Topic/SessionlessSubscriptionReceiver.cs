@@ -54,7 +54,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     //MessageWaitTimeout = TimeSpan.FromSeconds(30)
                 };
 
-                subscriptionClient.PrefetchCount = 250;
+                subscriptionClient.PrefetchCount = 0;
                 subscriptionClient.RegisterMessageHandler(OnMessage, sessionOptions);
             }
         }
@@ -92,7 +92,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 MaxAutoRenewDuration = TimeSpan.FromMinutes(_messageLockMinutes)
             };
 
-            subscriptionClient.PrefetchCount = 250;
+            subscriptionClient.PrefetchCount = 0;
             subscriptionClient.RegisterMessageHandler(OnMessage, sessionOptions);
 
             if (_autoTryReconnect) {
