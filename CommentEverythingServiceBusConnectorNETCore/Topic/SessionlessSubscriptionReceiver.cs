@@ -83,7 +83,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
         public void Listen() {
             subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
-            RetryPolicy policy = new RetryExponential(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(29), 10);
+            RetryPolicy policy = new RetryExponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), 3);
             subscriptionClient.ServiceBusConnection.RetryPolicy = policy;
 
             var sessionOptions = new MessageHandlerOptions(ExceptionReceivedHandler) {
@@ -134,8 +134,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 logger.LogInformation(String.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
             } catch (Exception ex) {
                 await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
-
-                throw new ApplicationException(ex.Message + ex.StackTrace);
+                logger.LogError(ex.Message + ex.StackTrace);
+                //throw new ApplicationException(ex.Message + ex.StackTrace);
             }
         }
 
