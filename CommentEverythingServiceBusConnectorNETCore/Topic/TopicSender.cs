@@ -151,7 +151,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
                 success = false;
             } finally {
                 // --- Close queue
-                await queueClient.CloseAsync();
+                //await queueClient.CloseAsync();
             }
 
             return success;

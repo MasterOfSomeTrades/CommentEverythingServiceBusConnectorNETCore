@@ -102,7 +102,7 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
                 await Task.WhenAll(taskList);
 
                 // --- Close queue
-                await queueClient.CloseAsync();
+                //await queueClient.CloseAsync();
 
                 return true;
             } catch (Exception exception) {
