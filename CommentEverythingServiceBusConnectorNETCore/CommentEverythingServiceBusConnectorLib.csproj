@@ -12,12 +12,13 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Create and make accessible a list of transformed/processed messages.
-Do not close client after sending messages.</PackageReleaseNotes>
-    <Version>3.0.0</Version>
+    <PackageReleaseNotes>Allow asynchronous message processing.
+Processed message returned as string.
+Asynchonous listen when autoretry is true.</PackageReleaseNotes>
+    <Version>3.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>3.0.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.0</FileVersion>
+    <AssemblyVersion>3.1.0.0</AssemblyVersion>
+    <FileVersion>3.1.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -82,7 +82,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             }
         }
 
-        public void Listen() {
+        public async void Listen() {
             subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
             RetryPolicy policy = new RetryExponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), 3);
             subscriptionClient.ServiceBusConnection.RetryPolicy = policy;
@@ -98,13 +98,13 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
             if (_autoTryReconnect) {
                 while (true) {
-                    Task.Delay(10000).GetAwaiter().GetResult();
+                    await Task.Delay(10000);
                     TryReconnect();
                 }
             }
         }
 
-        protected abstract void ProcessMessage(Message messageAsObject, string messageAsUTF8, out string updatedMessageAsUTF8);
+        protected abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
         protected abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
 
         private async Task OnMessage(Message messageToHandle, CancellationToken lockToken) {
@@ -118,8 +118,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 
                 int totalMessagesCount = int.Parse(messageToHandle.UserProperties["Count"].ToString());
 
-                string updatedMessage = "";
-                ProcessMessage(messageToHandle, dataJSON, out updatedMessage);
+                string updatedMessage = await ProcessMessage(messageToHandle, dataJSON);
+
                 if (!updatedMessage.Equals("", StringComparison.InvariantCultureIgnoreCase)) {
                     _processedMessagesHolder[groupId].TryAdd(messageToHandle.MessageId, updatedMessage);
                 }
