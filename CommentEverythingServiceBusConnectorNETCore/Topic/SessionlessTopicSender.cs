@@ -29,15 +29,11 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         string ServiceBusConnectionString;
         string TopicName;
         private ITopicClient queueClient;
-        private List<List<Message>> _messageListStructure = new List<List<Message>>();
+        //private List<List<Message>> _messageListStructure = new List<List<Message>>();
         private long _currentSizeTotal = 0;
 
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
-
-        public bool Test() {
-            return true;
-        }
 
         /// <summary>
         /// Send single message (only one message in session) to Topic with custom UserProperties of CollectionId, Count, and Context.
@@ -99,6 +95,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 queueClient = new TopicClient(ServiceBusConnectionString, TopicName);
 
                 // --- Setup
+                List<List<Message>> _messageListStructure = new List<List<Message>>();
                 _messageListStructure = new List<List<Message>>();
                 _messageListStructure.Add(new List<Message>());
                 _currentSizeTotal = 0;
@@ -134,6 +131,66 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
+
+                List<Task> taskList = new List<Task>();
+                foreach (List<Message> l in _messageListStructure) {
+                    logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    taskList.Add(queueClient.SendAsync(l));
+                }
+
+                // --- Send the Messages to the queue.
+                await Task.WhenAll(taskList);
+
+                success = true;
+            } catch (Exception exception) {
+                logger.LogError(exception.Message);
+                logger.LogDebug(exception.StackTrace);
+                success = false;
+            } finally {
+                // --- Close queue
+                //await queueClient.CloseAsync();
+            }
+
+            return success;
+        }
+
+
+        public async Task<bool> Send(string message, string groupId, string context, DateTime scheduledTime, string eventType, string messageIdOverride, int collectionMessagesCount) {
+            bool success = false;
+
+            try {
+                queueClient = new TopicClient(ServiceBusConnectionString, TopicName);
+
+                // --- Setup
+                List<List<Message>> _messageListStructure = new List<List<Message>>();
+                _messageListStructure = new List<List<Message>>();
+                _messageListStructure.Add(new List<Message>());
+                _currentSizeTotal = 0;
+                int messageCount = 0;
+
+                // --- Loop through message IList
+                //foreach (string m in messages) {
+                    messageCount = messageCount + 1;
+                    Message msg = new Message(Encoding.UTF8.GetBytes(message)) {
+                        CorrelationId = context
+                    };
+
+                    msg.UserProperties.Add("CollectionId", groupId);
+                    msg.UserProperties.Add("Count", collectionMessagesCount);
+                    msg.UserProperties.Add("Context", context);
+                    msg.UserProperties.Add("EventType", eventType);
+                    msg.MessageId = messageIdOverride;
+                    if (scheduledTime != DateTime.MinValue) {
+                        msg.ScheduledEnqueueTimeUtc = scheduledTime;
+                    }
+                    if (_currentSizeTotal + msg.Size > 100000) {
+                        _currentSizeTotal = 0;
+                        _messageListStructure.Add(new List<Message>());
+                    }
+                    _currentSizeTotal = _currentSizeTotal + msg.Size;
+                    logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    _messageListStructure[_messageListStructure.Count - 1].Add(msg);
+                //}
 
                 List<Task> taskList = new List<Task>();
                 foreach (List<Message> l in _messageListStructure) {

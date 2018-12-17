@@ -12,13 +12,12 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Allow asynchronous message processing.
-Processed message returned as string.
-Asynchonous listen when autoretry is true.</PackageReleaseNotes>
-    <Version>3.1.0</Version>
+    <PackageReleaseNotes>Fixed concurrency bug for multiple messages sent in sessionless implementation.
+Added ability to override message ID and collection count for collections sent as single messages.</PackageReleaseNotes>
+    <Version>3.2.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>3.1.0.0</AssemblyVersion>
-    <FileVersion>3.1.0.0</FileVersion>
+    <AssemblyVersion>3.2.0.0</AssemblyVersion>
+    <FileVersion>3.2.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
