@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CommentEverythingServiceBusConnectorNETCore.Topic
@@ -11,6 +12,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         protected SessionlessTopicSender() {
             // --- Must use parameterized constructor
         }
+
+        private SemaphoreSlim _semaphore = new SemaphoreSlim(10);
 
         /// <summary>
         /// Sets up Topic with Connection String and Topic Name. Also instantiates an ILogger.
@@ -195,7 +198,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 List<Task> taskList = new List<Task>();
                 foreach (List<Message> l in _messageListStructure) {
                     logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
-                    taskList.Add(queueClient.SendAsync(l));
+                    await _semaphore.WaitAsync();
+                    taskList.Add(queueClient.SendAsync(l).ContinueWith((t) => _semaphore.Release()));
                 }
 
                 // --- Send the Messages to the queue.
