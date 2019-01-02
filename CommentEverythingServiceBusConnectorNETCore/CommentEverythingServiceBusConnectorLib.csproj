@@ -12,12 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Fixed concurrency bug for multiple messages sent in sessionless implementation.
-Added ability to override message ID and collection count for collections sent as single messages.</PackageReleaseNotes>
-    <Version>3.2.0</Version>
+    <PackageReleaseNotes>Added semaphore lock to ensure resources not overloaded when sending messages.</PackageReleaseNotes>
+    <Version>3.2.1</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>3.2.0.0</AssemblyVersion>
-    <FileVersion>3.2.0.0</FileVersion>
+    <AssemblyVersion>3.2.1.0</AssemblyVersion>
+    <FileVersion>3.2.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
