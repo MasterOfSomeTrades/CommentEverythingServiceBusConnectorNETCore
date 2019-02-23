@@ -46,11 +46,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
         protected abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
         protected abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
+        static IDatabase cache = lazyConnection.Value.GetDatabase();
 
         public async Task OnMessage(Message messageToHandle) {
             try {
-                IDatabase cache = lazyConnection.Value.GetDatabase();
-
                 string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
 
                 // _processedMessagesHolder.TryAdd(groupId, new ConcurrentDictionary<string, string>());
