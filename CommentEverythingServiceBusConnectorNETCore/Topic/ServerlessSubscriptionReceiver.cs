@@ -53,17 +53,21 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
 
                 // _processedMessagesHolder.TryAdd(groupId, new ConcurrentDictionary<string, string>());
-                cache.HashSet(groupId, new HashEntry[] { });
+                await cache.HashSetAsync(groupId, new HashEntry[] { });
 
                 string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
 
                 int totalMessagesCount = int.Parse(messageToHandle.UserProperties["Count"].ToString());
 
                 string updatedMessage = await ProcessMessage(messageToHandle, dataJSON);
+                bool isNewEntry = false;
 
                 if (!updatedMessage.Equals("", StringComparison.InvariantCultureIgnoreCase)) {
                     //_processedMessagesHolder[groupId].TryAdd(messageToHandle.MessageId, updatedMessage);
-                    await cache.HashSetAsync(groupId, new HashEntry[] { new HashEntry(messageToHandle.MessageId, updatedMessage) });
+                    if (!(await cache.HashGetAllAsync(groupId)).ToStringDictionary().ContainsKey(messageToHandle.MessageId)) {
+                        isNewEntry = true;
+                        await cache.HashSetAsync(groupId, new HashEntry[] { new HashEntry(messageToHandle.MessageId, updatedMessage) });
+                    }
                 }
 
                 //await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
@@ -75,7 +79,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 RedisValue[] _messageHolder = cache.SetMembers(groupId + "_messageHolder");
                 int processedMessagesCount = _messageHolder.Length;
 
-                if (processedMessagesCount == totalMessagesCount) {
+                if (processedMessagesCount == totalMessagesCount && isNewEntry) {
                     // --- Get original messages list
                     //HashSet<string> removed = new HashSet<string>();
                     //_messageHolder.TryRemove(groupId, out removed);
