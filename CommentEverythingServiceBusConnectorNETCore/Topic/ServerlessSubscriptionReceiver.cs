@@ -76,37 +76,43 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 await cache.SetAddAsync(groupId + "_messageHolder", dataJSON);
 
                 //int processedMessagesCount = _messageHolder[groupId].Count;
-                RedisValue[] _messageHolder = cache.SetMembers(groupId + "_messageHolder");
+                RedisValue[] _messageHolder = await cache.SetMembersAsync(groupId + "_messageHolder");
                 int processedMessagesCount = _messageHolder.Length;
 
+                long numberProcessed = -1;
+
                 if (processedMessagesCount == totalMessagesCount && isNewEntry) {
-                    // --- Get original messages list
-                    //HashSet<string> removed = new HashSet<string>();
-                    //_messageHolder.TryRemove(groupId, out removed);
-                    //IList<string> messagesList = removed.ToList();
-                    IList<string> messagesList = new List<string>();
-                    foreach (RedisValue rv in _messageHolder) {
-                        messagesList.Add(rv.ToString());
-                    }
-                    await cache.KeyDeleteAsync(groupId + "_messageHolder");
-
-                    // --- Get processed messages list
-                    IList<string> processedMessagesList = new List<string>();
-                    //if (removedDictionary.Count > 0) {
-                    HashEntry[] processedMessages = await cache.HashGetAllAsync(groupId);
-                    if (processedMessages.Length > 0) {
-                        //processedMessagesList = removedDictionary.Values.ToList();
-                        foreach (HashEntry he in processedMessages) {
-                            processedMessagesList.Add(he.Value.ToString());
+                    if (await cache.HashIncrementAsync("ServerlessTopicMessagesProcessed", groupId) == 1) {
+                        // --- Get original messages list
+                        //HashSet<string> removed = new HashSet<string>();
+                        //_messageHolder.TryRemove(groupId, out removed);
+                        //IList<string> messagesList = removed.ToList();
+                        IList<string> messagesList = new List<string>();
+                        foreach (RedisValue rv in _messageHolder) {
+                            messagesList.Add(rv.ToString());
                         }
+                        await cache.KeyDeleteAsync(groupId + "_messageHolder");
+
+                        // --- Get processed messages list
+                        IList<string> processedMessagesList = new List<string>();
+                        //if (removedDictionary.Count > 0) {
+                        HashEntry[] processedMessages = await cache.HashGetAllAsync(groupId);
+                        if (processedMessages.Length > 0) {
+                            //processedMessagesList = removedDictionary.Values.ToList();
+                            foreach (HashEntry he in processedMessages) {
+                                processedMessagesList.Add(he.Value.ToString());
+                            }
+                        }
+                        //}
+
+                        //_processedMessagesHolder.TryRemove(groupId, out removedDictionary);
+
+                        logger.LogInformation(string.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
+                        ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
+
+                        await cache.KeyDeleteAsync(groupId);
+                        await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", groupId);
                     }
-                    //}
-
-                    //_processedMessagesHolder.TryRemove(groupId, out removedDictionary);
-                    await cache.KeyDeleteAsync(groupId);
-
-                    logger.LogInformation(string.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
-                    ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
                 }
 
                 logger.LogInformation(string.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
