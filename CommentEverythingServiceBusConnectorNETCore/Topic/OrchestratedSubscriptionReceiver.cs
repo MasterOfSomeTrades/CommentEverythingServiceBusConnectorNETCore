@@ -27,7 +27,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             }
         }
 
-        public async void StartOrchestrator(DurableOrchestrationContext context, Message firstMessage) {
+        public async Task StartOrchestrator(DurableOrchestrationContext context, Message firstMessage) {
             HashSet<string> messageIds = new HashSet<string>();
             IList<string> originalMessages = new List<string>();
             IList<string> processedMessages = new List<string>();
