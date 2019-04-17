@@ -11,16 +11,16 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         private static ILogger log = null;
         private const string EventName = "CETOPIC_MESSAGE_RECEIVED";
 
-        public static async Task OnMessage(Message theMessage, DurableOrchestrationClient client, ILogger logger) {
+        public static async Task OnMessage(Message theMessage, DurableOrchestrationClient client, ILogger logger, string orchestrationStarterName = "StartMessageOrchestrator") {
             try {
                 log = logger;
                 string groupId = theMessage.UserProperties["CollectionId"].ToString();
                 if (await client.GetStatusAsync(groupId + "_topics") == null) {
-                    string clientId = await client.StartNewAsync("StartMessagesOrchestrator", groupId + "_topics", theMessage);
+                    string clientId = await client.StartNewAsync(orchestrationStarterName, groupId + "_topics", theMessage);
                     log.LogInformation(string.Format("Durable client started with ID {0}", clientId));
                 }
 
-                log.LogInformation(string.Format("Raising event {0}", EventName));
+                log.LogInformation(string.Format("Event raised: {0}", EventName));
                 await client.RaiseEventAsync(groupId + "_topics", EventName, theMessage);
             } catch (Exception ex) {
                 log.LogError(ex.Message + ex.StackTrace);

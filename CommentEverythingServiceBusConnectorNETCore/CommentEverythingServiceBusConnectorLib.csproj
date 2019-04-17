@@ -13,10 +13,10 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
     <PackageReleaseNotes>Add Azure Durable Functions capability.</PackageReleaseNotes>
-    <Version>5.2.7</Version>
+    <Version>5.2.8</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>5.2.7.0</AssemblyVersion>
-    <FileVersion>5.2.7.0</FileVersion>
+    <AssemblyVersion>5.2.8.0</AssemblyVersion>
+    <FileVersion>5.2.8.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

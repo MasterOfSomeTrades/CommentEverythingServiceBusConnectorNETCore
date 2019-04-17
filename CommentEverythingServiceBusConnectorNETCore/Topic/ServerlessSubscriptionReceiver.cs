@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace CommentEverythingServiceBusConnectorNETCore.Topic {
-    public abstract class ServerlessSubscriptionReceiver {
+    public abstract class ServerlessSubscriptionReceiver : ISubscriptionReceiver {
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
 
@@ -44,8 +44,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             }
         }
 
-        protected abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
-        protected abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
+        public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
+        public abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
         static IDatabase cache = lazyConnection.Value.GetDatabase();
 
         public async Task OnMessage(Message messageToHandle) {
@@ -78,8 +78,6 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 //int processedMessagesCount = _messageHolder[groupId].Count;
                 RedisValue[] _messageHolder = await cache.SetMembersAsync(groupId + "_messageHolder");
                 int processedMessagesCount = _messageHolder.Length;
-
-                long numberProcessed = -1;
 
                 if (processedMessagesCount == totalMessagesCount && isNewEntry) {
                     if (await cache.HashIncrementAsync("ServerlessTopicMessagesProcessed", groupId) == 1) {

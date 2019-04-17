@@ -1,5 +1,4 @@
-﻿using CommentEverythingServiceBusConnectorLib.Queue;
-using Microsoft.Azure.ServiceBus;
+﻿using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CommentEverythingServiceBusConnectorNETCore.Topic
 {
-    public abstract class SessionlessSubscriptionReceiver {
+    public abstract class SessionlessSubscriptionReceiver : ISubscriptionReceiver {
         ISubscriptionClient subscriptionClient;
         private string ServiceBusConnectionString;
         private string TopicName;
@@ -104,8 +103,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             }
         }
 
-        protected abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
-        protected abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
+        public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
+        public abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
 
         private async Task OnMessage(Message messageToHandle, CancellationToken lockToken) {
             try {
