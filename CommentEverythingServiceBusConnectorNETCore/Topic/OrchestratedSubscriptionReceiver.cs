@@ -11,7 +11,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         private static ILogger log = null;
         private const string EventName = "CETOPIC_MESSAGE_RECEIVED";
 
-        public static async Task OnMessage(Message theMessage, DurableOrchestrationClient client, ILogger logger, string orchestrationStarterName = "StartMessageOrchestrator") {
+        public static async Task OnMessage(Message theMessage, DurableOrchestrationClient client, ILogger logger, string orchestrationStarterName = "StartMessagesOrchestrator") {
             try {
                 log = logger;
                 string groupId = theMessage.UserProperties["CollectionId"].ToString();
