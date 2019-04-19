@@ -13,10 +13,10 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
     <PackageReleaseNotes>Add Azure Durable Functions capability. Improve efficiency with asynchronous functions.</PackageReleaseNotes>
-    <Version>5.3.1</Version>
+    <Version>5.3.2</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>5.3.1.0</AssemblyVersion>
-    <FileVersion>5.3.1.0</FileVersion>
+    <AssemblyVersion>5.3.2.0</AssemblyVersion>
+    <FileVersion>5.3.2.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
