@@ -35,7 +35,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             Message thisMessage = null;
 
             while (remainingToBeProcessed > 0) {
-                thisMessage = await context.WaitForExternalEvent<Message>(EventName, TimeSpan.FromMinutes(5));
+                thisMessage = await context.WaitForExternalEvent<Message>(EventName, TimeSpan.FromMinutes(1));
                 if (!messageIds.Contains(thisMessage.MessageId)) {
                     remainingToBeProcessed--;
                     messageIds.Add(thisMessage.MessageId);
