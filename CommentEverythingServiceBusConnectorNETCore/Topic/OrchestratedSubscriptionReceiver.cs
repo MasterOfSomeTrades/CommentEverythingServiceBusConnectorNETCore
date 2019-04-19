@@ -32,10 +32,12 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             IList<string> originalMessages = new List<string>();
             IList<string> processedMessages = new List<string>();
             int remainingToBeProcessed = int.Parse(firstMessage.UserProperties["Count"].ToString());
+            int overrideNumber = remainingToBeProcessed + 3;
             Message thisMessage = null;
 
-            while (remainingToBeProcessed > 0) {
+            while (remainingToBeProcessed > 0 && overrideNumber > 0) {
                 thisMessage = await context.WaitForExternalEvent<Message>(EventName, TimeSpan.FromMinutes(1));
+                overrideNumber--;
                 if (!messageIds.Contains(thisMessage.MessageId)) {
                     remainingToBeProcessed--;
                     messageIds.Add(thisMessage.MessageId);
@@ -46,7 +48,11 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 }
             }
 
-            ProcessMessagesWhenLastReceived(originalMessages, thisMessage, processedMessages);
+            if (remainingToBeProcessed == 0) {
+                ProcessMessagesWhenLastReceived(originalMessages, thisMessage, processedMessages);
+            } else {
+                throw new ApplicationException("Missing messages - some messages have not been received by the orchestrator");
+            }
         }
 
         [FunctionName("StartMessagesOrchestrator")]
