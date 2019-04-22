@@ -10,18 +10,22 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
     public abstract class OrchestratedSubscriptionReceiver : ISubscriptionReceiver {
         private static ILogger log = null;
         private const string EventName = "CETOPIC_MESSAGE_RECEIVED";
+        private static DurableOrchestrationClient _client = null;
 
         public static async Task OnMessage(Message theMessage, DurableOrchestrationClient client, ILogger logger, string orchestrationStarterName = "StartMessagesOrchestrator") {
             try {
                 log = logger;
+                if (_client is null) {
+                    _client = client;
+                }
                 string groupId = theMessage.UserProperties["CollectionId"].ToString();
-                if (await client.GetStatusAsync(groupId + "_topics") == null) {
-                    string clientId = await client.StartNewAsync(orchestrationStarterName, groupId + "_topics", theMessage);
+                if (await _client.GetStatusAsync(groupId + "_topics") is null) {
+                    string clientId = await _client.StartNewAsync(orchestrationStarterName, groupId + "_topics", theMessage);
                     log.LogInformation(string.Format("Durable client started with ID {0}", clientId));
                 }
 
                 log.LogInformation(string.Format("Event raised: {0}", EventName));
-                await client.RaiseEventAsync(groupId + "_topics", EventName, theMessage);
+                await _client.RaiseEventAsync(groupId + "_topics", EventName, theMessage);
             } catch (Exception ex) {
                 log.LogError(ex.Message + ex.StackTrace);
             }
@@ -53,6 +57,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             } else {
                 throw new ApplicationException("Missing messages - some messages have not been received by the orchestrator");
             }
+
+            await _client.TerminateAsync(thisMessage.UserProperties["CollectionId"].ToString() + "_topics", "All messages processed for this context");
         }
 
         [FunctionName("StartMessagesOrchestrator")]
