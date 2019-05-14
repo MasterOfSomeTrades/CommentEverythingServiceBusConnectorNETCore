@@ -45,7 +45,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         }
 
         public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
-        public abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
+        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
         static IDatabase cache = lazyConnection.Value.GetDatabase();
 
         public async Task OnMessage(Message messageToHandle) {
@@ -106,7 +106,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                         //_processedMessagesHolder.TryRemove(groupId, out removedDictionary);
 
                         logger.LogInformation(string.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
-                        ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
+                        await ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
 
                         await cache.KeyDeleteAsync(groupId);
                         await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", groupId);

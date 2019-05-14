@@ -40,9 +40,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             Message thisMessage = null;
 
             while (remainingToBeProcessed > 0 && overrideNumber > 0) {
+                log.LogInformation(string.Format("[{0}] Messages remaining: {1}", firstMessage.UserProperties["CollectionId"].ToString(), remainingToBeProcessed.ToString()));
                 thisMessage = await context.WaitForExternalEvent<Message>(EventName, TimeSpan.FromMinutes(1));
                 overrideNumber--;
-                if (!messageIds.Contains(thisMessage.MessageId)) {
+                if (!(thisMessage is null) && !messageIds.Contains(thisMessage.MessageId)) {
                     remainingToBeProcessed--;
                     messageIds.Add(thisMessage.MessageId);
                     string dataJSON = Encoding.UTF8.GetString(thisMessage.Body);
@@ -53,7 +54,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             }
 
             if (remainingToBeProcessed == 0) {
-                ProcessMessagesWhenLastReceived(originalMessages, thisMessage, processedMessages);
+                await ProcessMessagesWhenLastReceived(originalMessages, thisMessage, processedMessages);
             } else {
                 throw new ApplicationException("Missing messages - some messages have not been received by the orchestrator");
             }
@@ -62,10 +63,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         }
 
         [FunctionName("StartMessagesOrchestrator")]
-        public abstract void StartMessagesOrchestrator([OrchestrationTrigger] DurableOrchestrationContext context);
+        public abstract Task StartMessagesOrchestrator([OrchestrationTrigger] DurableOrchestrationContext context);
 
         public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
 
-        public abstract void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
+        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
     }
 }

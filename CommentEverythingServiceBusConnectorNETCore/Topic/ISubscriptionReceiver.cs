@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 namespace CommentEverythingServiceBusConnectorNETCore.Topic {
     public interface ISubscriptionReceiver {
         Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
-        void ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
+        Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
     }
 }

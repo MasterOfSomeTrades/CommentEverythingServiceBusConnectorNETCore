@@ -12,11 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Add Azure Durable Functions capability. Improve efficiency with asynchronous functions.</PackageReleaseNotes>
-    <Version>5.3.3</Version>
+    <PackageReleaseNotes>Implement ISubscription Receiver and return Task on async calls.</PackageReleaseNotes>
+    <Version>5.3.7</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>5.3.3.0</AssemblyVersion>
-    <FileVersion>5.3.3.0</FileVersion>
+    <AssemblyVersion>5.3.7.0</AssemblyVersion>
+    <FileVersion>5.3.7.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
