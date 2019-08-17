@@ -50,7 +50,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
         public async Task OnMessage(Message messageToHandle) {
             try {
-                string groupId = messageToHandle.UserProperties["CollectionId"].ToString();
+                string groupId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{messageToHandle.UserProperties["EventType"].ToString()}";
 
                 // _processedMessagesHolder.TryAdd(groupId, new ConcurrentDictionary<string, string>());
                 await cache.HashSetAsync(groupId, new HashEntry[] { });
@@ -73,10 +73,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 //await subscriptionClient.CompleteAsync(messageToHandle.SystemProperties.LockToken);
 
                 //_messageHolder[groupId].Add(dataJSON);
-                await cache.SetAddAsync(groupId + "_messageHolder", dataJSON);
+                await cache.SetAddAsync($"{groupId}|messageHolder", dataJSON);
 
                 //int processedMessagesCount = _messageHolder[groupId].Count;
-                RedisValue[] _messageHolder = await cache.SetMembersAsync(groupId + "_messageHolder");
+                RedisValue[] _messageHolder = await cache.SetMembersAsync($"{groupId}|messageHolder");
                 int processedMessagesCount = _messageHolder.Length;
 
                 if (processedMessagesCount == totalMessagesCount && isNewEntry) {
@@ -89,7 +89,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                         foreach (RedisValue rv in _messageHolder) {
                             messagesList.Add(rv.ToString());
                         }
-                        await cache.KeyDeleteAsync(groupId + "_messageHolder");
+                        await cache.KeyDeleteAsync($"{groupId}|messageHolder");
 
                         // --- Get processed messages list
                         IList<string> processedMessagesList = new List<string>();

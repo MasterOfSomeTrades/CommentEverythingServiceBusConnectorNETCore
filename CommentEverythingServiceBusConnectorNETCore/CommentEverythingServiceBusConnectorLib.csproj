@@ -12,11 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Implement ISubscription Receiver and return Task on async calls.</PackageReleaseNotes>
-    <Version>5.3.7</Version>
+    <PackageReleaseNotes>Bug fix: concatenate EventType with CollectionId in redis cache to accept sets of events with different EventIds in the same collection</PackageReleaseNotes>
+    <Version>5.4.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>5.3.7.0</AssemblyVersion>
-    <FileVersion>5.3.7.0</FileVersion>
+    <AssemblyVersion>5.4.0.0</AssemblyVersion>
+    <FileVersion>5.4.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
