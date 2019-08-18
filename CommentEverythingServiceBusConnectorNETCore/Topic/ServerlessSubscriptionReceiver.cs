@@ -13,6 +13,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
     public abstract class ServerlessSubscriptionReceiver : ISubscriptionReceiver {
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
+        private static IList<string> _eventsToReceive = new List<string>();
 
         //private ConcurrentDictionary<string, HashSet<string>> _messageHolder = new ConcurrentDictionary<string, HashSet<string>>();
 
@@ -44,13 +45,28 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             }
         }
 
+        public ServerlessSubscriptionReceiver(string[] events) {
+            if (logger is null) {
+                logger = loggerFactory.CreateLogger<ServerlessSubscriptionReceiver>();
+            }
+            _eventsToReceive = events.ToList();
+        }
+
         public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
-        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage = null, IList<string> listOfProcessedMessagesAsUTF8 = null);
+        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
+        public abstract Task ProcessCollectionMessagesWhenAllReceived(Message lastMessage, Dictionary<string, IList<string>> listOfProcessedMessagesAsUTF8);
         static IDatabase cache = lazyConnection.Value.GetDatabase();
 
         public async Task OnMessage(Message messageToHandle) {
             try {
+                // --- Define groupId
                 string groupId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{messageToHandle.UserProperties["EventType"].ToString()}";
+                string collectionId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}";
+
+                // --- If no events listed, default to only EventType
+                if (_eventsToReceive.Count == 0) {
+                    _eventsToReceive.Add(messageToHandle.UserProperties["EventType"].ToString());
+                }
 
                 // _processedMessagesHolder.TryAdd(groupId, new ConcurrentDictionary<string, string>());
                 await cache.HashSetAsync(groupId, new HashEntry[] { });
@@ -108,8 +124,43 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                         logger.LogInformation(string.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
                         await ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
 
-                        await cache.KeyDeleteAsync(groupId);
-                        await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", groupId);
+                        // --- Add to Events Received for Parent Collection
+                        await cache.SetAddAsync($"{collectionId}|EventsReceived", messageToHandle.UserProperties["EventType"].ToString());
+
+                        bool AllEventsReceived = true;
+                        foreach (string e in _eventsToReceive) {
+                            if (!(await cache.SetContainsAsync($"{collectionId}|EventsReceived", e))) {
+                                AllEventsReceived = false;
+                                break;
+                            }
+                        }
+
+                        // --- Delete child message holders
+                        if (AllEventsReceived) {
+                            Dictionary<string, IList<string>> originalMessagesDictionary = new Dictionary<string, IList<string>>();
+                            Dictionary<string, IList<string>> processedMessagesDictionary = new Dictionary<string, IList<string>>();
+                            foreach (string e in _eventsToReceive) {
+                                await cache.SetRemoveAsync($"{collectionId}|EventsReceived", e);
+                                if (await cache.SetLengthAsync($"{collectionId}|EventsReceived") == 0) {
+                                    await cache.KeyDeleteAsync($"{collectionId}|EventsReceived");
+                                }
+
+                                // --- Get processed messages list
+                                IList<string> eventProcessedMessagesList = new List<string>();
+                                HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                                if (eventProcessedMessagesHash.Length > 0) {
+                                    foreach (HashEntry he in eventProcessedMessagesHash) {
+                                        eventProcessedMessagesList.Add(he.Value.ToString());
+                                    }
+                                }
+                                processedMessagesDictionary.Add(e, eventProcessedMessagesList);
+
+                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                                await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                            }
+
+                            await ProcessCollectionMessagesWhenAllReceived(messageToHandle, processedMessagesDictionary);
+                        }
                     }
                 }
 
