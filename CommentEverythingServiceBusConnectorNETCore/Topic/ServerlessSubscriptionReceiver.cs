@@ -171,10 +171,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 }
 
                 logger.LogInformation(string.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
-            } catch {
+            } catch (Exception ex) {
                 //await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
-                throw;
-                //throw new ApplicationException(ex.Message + ex.StackTrace);
+                throw new ApplicationException($"Error in reading messages - {ex.Message} {ex.StackTrace}");
             }
         }
 
