@@ -54,7 +54,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
         public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
         public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
-        public abstract Task ProcessCollectionMessagesWhenAllReceived(Message lastMessage, Dictionary<string, IList<string>> listOfProcessedMessagesAsUTF8);
+        public abstract Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>>dictionaryOfOriginalMessagesAsUTF8, Message lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8);
         static IDatabase cache = lazyConnection.Value.GetDatabase();
 
         public async Task OnMessage(Message messageToHandle) {
@@ -98,14 +98,11 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 if (processedMessagesCount == totalMessagesCount && isNewEntry) {
                     if (await cache.HashIncrementAsync("ServerlessTopicMessagesProcessed", groupId) == 1) {
                         // --- Get original messages list
-                        //HashSet<string> removed = new HashSet<string>();
-                        //_messageHolder.TryRemove(groupId, out removed);
-                        //IList<string> messagesList = removed.ToList();
                         IList<string> messagesList = new List<string>();
                         foreach (RedisValue rv in _messageHolder) {
                             messagesList.Add(rv.ToString());
                         }
-                        await cache.KeyDeleteAsync($"{groupId}|messageHolder");
+                        //await cache.KeyDeleteAsync($"{groupId}|messageHolder"); // commented out - TODO: verify functionality
 
                         // --- Get processed messages list
                         IList<string> processedMessagesList = new List<string>();
@@ -145,6 +142,15 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                                     await cache.KeyDeleteAsync($"{collectionId}|EventsReceived");
                                 }
 
+                                // --- Get original messages list
+                                IList<string> eventOriginalMessagesList = new List<string>();
+                                RedisValue[] eventOriginalMessagesArray = await cache.SetMembersAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
+                                foreach (RedisValue rv in eventOriginalMessagesArray) {
+                                    eventOriginalMessagesList.Add(rv.ToString());
+                                }
+                                originalMessagesDictionary.Add(e, eventOriginalMessagesList);
+                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
+
                                 // --- Get processed messages list
                                 IList<string> eventProcessedMessagesList = new List<string>();
                                 HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
@@ -159,7 +165,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                                 await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
                             }
 
-                            await ProcessCollectionMessagesWhenAllReceived(messageToHandle, processedMessagesDictionary);
+                            await ProcessCollectionMessagesWhenAllReceived(originalMessagesDictionary, messageToHandle, processedMessagesDictionary);
                         }
                     }
                 }
