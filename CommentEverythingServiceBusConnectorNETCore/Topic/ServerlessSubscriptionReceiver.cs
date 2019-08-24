@@ -13,7 +13,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
     public abstract class ServerlessSubscriptionReceiver : ISubscriptionReceiver {
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
-        private static IList<string> _eventsToReceive = new List<string>();
+        private IList<string> _eventsToReceive = new List<string>();
+        private string _listenerGroupId = "NOSESSIONS";
 
         //private ConcurrentDictionary<string, HashSet<string>> _messageHolder = new ConcurrentDictionary<string, HashSet<string>>();
 
@@ -45,11 +46,12 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             }
         }
 
-        public ServerlessSubscriptionReceiver(string[] events) {
+        public ServerlessSubscriptionReceiver(string[] events, string listenerGroupIdentifier) {
             if (logger is null) {
                 logger = loggerFactory.CreateLogger<ServerlessSubscriptionReceiver>();
             }
             _eventsToReceive = events.ToList();
+            _listenerGroupId = listenerGroupIdentifier;
         }
 
         public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
@@ -60,8 +62,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         public async Task OnMessage(Message messageToHandle) {
             try {
                 // --- Define groupId
-                string groupId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{messageToHandle.UserProperties["EventType"].ToString()}";
-                string collectionId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}";
+                string groupId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{messageToHandle.UserProperties["EventType"].ToString()}|{_listenerGroupId}";
+                string collectionId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{_listenerGroupId}";
 
                 // --- If no events listed, default to only EventType
                 if (_eventsToReceive.Count == 0) {
@@ -144,16 +146,19 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
                                 // --- Get original messages list
                                 IList<string> eventOriginalMessagesList = new List<string>();
-                                RedisValue[] eventOriginalMessagesArray = await cache.SetMembersAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
+                                //RedisValue[] eventOriginalMessagesArray = await cache.SetMembersAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
+                                RedisValue[] eventOriginalMessagesArray = await cache.SetMembersAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}|messageHolder");
                                 foreach (RedisValue rv in eventOriginalMessagesArray) {
                                     eventOriginalMessagesList.Add(rv.ToString());
                                 }
                                 originalMessagesDictionary.Add(e, eventOriginalMessagesList);
-                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
+                                //await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
+                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}|messageHolder");
 
                                 // --- Get processed messages list
                                 IList<string> eventProcessedMessagesList = new List<string>();
-                                HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                                //HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                                HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}");
                                 if (eventProcessedMessagesHash.Length > 0) {
                                     foreach (HashEntry he in eventProcessedMessagesHash) {
                                         eventProcessedMessagesList.Add(he.Value.ToString());
@@ -161,8 +166,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                                 }
                                 processedMessagesDictionary.Add(e, eventProcessedMessagesList);
 
-                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
-                                await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                                //await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}");
+                                //await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
+                                await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}");
                             }
 
                             await ProcessCollectionMessagesWhenAllReceived(originalMessagesDictionary, messageToHandle, processedMessagesDictionary);
