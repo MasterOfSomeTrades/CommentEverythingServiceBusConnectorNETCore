@@ -29,6 +29,15 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             }
         }
 
+        public SessionlessTopicSender(string connectionString, string topic, ILogger log) {
+            ServiceBusConnectionString = connectionString;
+            TopicName = topic;
+
+            if (logger is null) {
+                logger = log;
+            }
+        }
+
         string ServiceBusConnectionString;
         string TopicName;
         private ITopicClient queueClient;
@@ -146,9 +155,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
                 success = true;
             } catch (Exception exception) {
-                logger.LogError(exception.Message);
-                logger.LogDebug(exception.StackTrace);
+                //logger.LogError(exception.Message);
+                //logger.LogDebug(exception.StackTrace);
                 success = false;
+                throw exception;
             } finally {
                 // --- Close queue
                 //await queueClient.CloseAsync();

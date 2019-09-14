@@ -24,6 +24,15 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
                 logger = loggerFactory.CreateLogger<TopicSender>();
             }
         }
+        public TopicSender(string connectionString, string topic, ILogger log) {
+            ServiceBusConnectionString = connectionString;
+            TopicName = topic;
+
+            if (logger is null) {
+                logger = log;
+            }
+        }
+
 
         string ServiceBusConnectionString;
         string TopicName;
@@ -33,10 +42,6 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
 
         private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
-
-        public bool Test() {
-            return true;
-        }
 
         /// <summary>
         /// Send single message (only one message in session) to Topic with custom UserProperties of CollectionId, Count, and Context.

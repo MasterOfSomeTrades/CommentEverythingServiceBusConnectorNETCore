@@ -12,11 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Bug fix: return messages in parent collection instead of blank lists</PackageReleaseNotes>
-    <Version>6.3.0</Version>
+    <PackageReleaseNotes>Bug fix: accept ILogger in ServerlessTopicSender</PackageReleaseNotes>
+    <Version>6.3.4</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>6.3.0.0</AssemblyVersion>
-    <FileVersion>6.3.0.0</FileVersion>
+    <AssemblyVersion>6.3.4.0</AssemblyVersion>
+    <FileVersion>6.3.4.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

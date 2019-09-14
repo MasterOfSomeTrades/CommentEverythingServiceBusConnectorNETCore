@@ -144,14 +144,15 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     }
 
                     logger.LogInformation(String.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
-                    ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
+                    await ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
                 }
 
                 logger.LogInformation(String.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
             } catch (Exception ex) {
                 await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
-                logger.LogError(ex.Message + ex.StackTrace);
+                //logger.LogError(ex.Message + ex.StackTrace);
                 //throw new ApplicationException(ex.Message + ex.StackTrace);
+                throw ex;
             }
         }
 
