@@ -46,9 +46,23 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             }
         }
 
+        public ServerlessSubscriptionReceiver(ILogger log) {
+            if (logger is null) {
+                logger = log;
+            }
+        }
+
         public ServerlessSubscriptionReceiver(string[] events, string listenerGroupIdentifier) {
             if (logger is null) {
                 logger = loggerFactory.CreateLogger<ServerlessSubscriptionReceiver>();
+            }
+            _eventsToReceive = events.ToList();
+            _listenerGroupId = listenerGroupIdentifier;
+        }
+
+        public ServerlessSubscriptionReceiver(string[] events, string listenerGroupIdentifier, ILogger log) {
+            if (logger is null) {
+                logger = log;
             }
             _eventsToReceive = events.ToList();
             _listenerGroupId = listenerGroupIdentifier;
