@@ -12,11 +12,11 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Make SyntheticMonitoredMessageListener class public</PackageReleaseNotes>
-    <Version>7.0.1</Version>
+    <PackageReleaseNotes>Edit namespaces to be more descriptive of function; add SyntheticMessageCreator</PackageReleaseNotes>
+    <Version>7.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>7.0.1.0</AssemblyVersion>
-    <FileVersion>7.0.1.0</FileVersion>
+    <AssemblyVersion>7.1.0.0</AssemblyVersion>
+    <FileVersion>7.1.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using CommentEverythingServiceBusConnectorNETCore.Monitoring.Exceptions;
-using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Listeners;
+using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
+using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Library;
 using CommentEverythingServiceBusConnectorNETCore.Topic;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
@@ -9,13 +10,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects {
+namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.MonitoredService {
     /// <summary>
     /// Listen for MonitorMessages and forward to monitoring endpoint subscription for monitoring.
     /// This listener <B><I>must</I></B> be placed on the service to be monitored.
     /// </summary>
-    public class SyntheticMonitoredMessageListener {
-        public SyntheticMonitoredMessageListener(string connectionString, string monitoringTopic, ILogger log) {
+    public class SyntheticMessageListener {
+        public SyntheticMessageListener(string connectionString, string monitoringTopic, ILogger log) {
             _connectionString = connectionString;
             _monitoringTopic = monitoringTopic;
             if (_logger is null) {

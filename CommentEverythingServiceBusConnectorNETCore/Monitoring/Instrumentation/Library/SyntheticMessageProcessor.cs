@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Listeners {
+namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Library {
     class SyntheticMessageProcessor : ServerlessSubscriptionReceiver {
         private static SessionlessTopicSender ts = null;
         private static ILogger _logger = null;

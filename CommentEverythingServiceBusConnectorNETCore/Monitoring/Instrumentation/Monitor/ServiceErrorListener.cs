@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Listeners {
-     public class ServiceErrorListener {
+namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Monitor {
+    public class ServiceErrorListener {
         private static ILogger _logger;
 
         private ServiceErrorListener() {
