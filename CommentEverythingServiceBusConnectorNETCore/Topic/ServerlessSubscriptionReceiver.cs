@@ -86,6 +86,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
                 // _processedMessagesHolder.TryAdd(groupId, new ConcurrentDictionary<string, string>());
                 await cache.HashSetAsync(groupId, new HashEntry[] { });
+                await cache.KeyExpireAsync(groupId, new TimeSpan(0, 30, 0));
 
                 string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
 
@@ -99,6 +100,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                     if (!(await cache.HashGetAllAsync(groupId)).ToStringDictionary().ContainsKey(messageToHandle.MessageId)) {
                         isNewEntry = true;
                         await cache.HashSetAsync(groupId, new HashEntry[] { new HashEntry(messageToHandle.MessageId, updatedMessage) });
+                        await cache.KeyExpireAsync(groupId, new TimeSpan(0, 30, 0));
                     }
                 }
 
@@ -106,6 +108,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
                 //_messageHolder[groupId].Add(dataJSON);
                 await cache.SetAddAsync($"{groupId}|messageHolder", dataJSON);
+                await cache.KeyExpireAsync($"{groupId}|messageHolder", new TimeSpan(0, 30, 0));
 
                 //int processedMessagesCount = _messageHolder[groupId].Count;
                 RedisValue[] _messageHolder = await cache.SetMembersAsync($"{groupId}|messageHolder");
@@ -139,6 +142,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
                         // --- Add to Events Received for Parent Collection
                         await cache.SetAddAsync($"{collectionId}|EventsReceived", messageToHandle.UserProperties["EventType"].ToString());
+                        await cache.KeyExpireAsync($"{collectionId}|EventsReceived", new TimeSpan(0, 30, 0));
 
                         bool AllEventsReceived = true;
                         foreach (string e in _eventsToReceive) {
