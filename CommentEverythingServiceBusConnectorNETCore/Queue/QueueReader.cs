@@ -6,15 +6,23 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorLib.Queue
-{
+namespace CommentEverythingServiceBusConnectorNETCore.Queue {
     public abstract class QueueReader {
         public QueueReader(string connectionString, string listenToQueue) {
             ServiceBusConnectionString = connectionString;
             QueueName = listenToQueue;
 
-            if (logger is null) {
+            /*if (logger is null) {
                 logger = loggerFactory.CreateLogger<QueueReader>();
+            }*/
+        }
+
+        public QueueReader(string connectionString, string listenToQueue, ILogger log) {
+            ServiceBusConnectionString = connectionString;
+            QueueName = listenToQueue;
+
+            if (logger is null) {
+                logger = log;
             }
         }
 
@@ -23,7 +31,7 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
         private QueueClient queueClient;
         SemaphoreSlim sLock = new SemaphoreSlim(5);
 
-        private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
+        //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
 
         public void Connect() {
@@ -40,7 +48,9 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
                 };
                 queueClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
             } catch (Exception ex) {
-                logger.LogError(ex.Message + ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(ex.Message + ex.StackTrace);
+                }
                 throw new ApplicationException(ex.Message + ex.StackTrace);
             }
         }
@@ -51,23 +61,31 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
             string messageAsString = "";
             Task completionTask;
             try {
-                logger.LogInformation("===================== Processing Message =====================");
+                if (!(logger is null)) {
+                    logger.LogInformation("===================== Processing Message =====================");
+                }
                 completionTask = queueClient.CompleteAsync(message.SystemProperties.LockToken);
                 messageAsString = Encoding.Default.GetString(message.Body);
-                logger.LogInformation(messageAsString);
-                logger.LogInformation("==============================================================");
+                if (!(logger is null)) {
+                    logger.LogInformation(messageAsString);
+                    logger.LogInformation("==============================================================");
+                }
             } catch (Exception ex) {
-                logger.LogError("ERROR while receiving message from queue: " + ex.Message + ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError("ERROR while receiving message from queue: " + ex.Message + ex.StackTrace);
+                }
                 throw new ApplicationException(ex.Message);
             }
 
             try {
                 ProcessMessage(message, messageAsString);
             } catch (Exception ex) {
-                logger.LogError("ERROR processing message from queue: " + ex.Message + ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError("ERROR processing message from queue: " + ex.Message + ex.StackTrace);
+                }
                 throw new ApplicationException(ex.Message);
             }
-            
+
             try {
                 IList<Task> tasksList = new List<Task>();
                 await sLock.WaitAsync();
@@ -77,7 +95,9 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
                 }
             } catch (Exception ex) {
                 sLock.Release();
-                logger.LogError("ERROR completing message on queue: " + ex.Message + ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError("ERROR completing message on queue: " + ex.Message + ex.StackTrace);
+                }
                 throw new ApplicationException(ex.Message);
             }
             // --- Send message

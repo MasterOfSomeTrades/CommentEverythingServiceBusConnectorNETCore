@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorLib.Topic {
+namespace CommentEverythingServiceBusConnectorNETCore.Topic {
     public class TopicSender {
         protected TopicSender() {
             // --- Must use parameterized constructor
@@ -20,9 +20,9 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
             ServiceBusConnectionString = connectionString;
             TopicName = topic;
 
-            if (logger is null) {
+            /*if (logger is null) {
                 logger = loggerFactory.CreateLogger<TopicSender>();
-            }
+            }*/
         }
         public TopicSender(string connectionString, string topic, ILogger log) {
             ServiceBusConnectionString = connectionString;
@@ -40,7 +40,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
         private List<List<Message>> _messageListStructure = new List<List<Message>>();
         private long _currentSizeTotal = 0;
 
-        private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
+        //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
 
         /// <summary>
@@ -56,8 +56,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
             try {
                 success = await Send(new string[] { message }, groupId, context, DateTime.MinValue, eventType);
             } catch (Exception ex) {
-                logger.LogError(ex.Message);
-                logger.LogDebug(ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(ex.Message);
+                    logger.LogDebug(ex.StackTrace);
+                }
                 success = false;
             }
 
@@ -79,8 +81,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
             try {
                 success = await Send(new string[] { message }, groupId, context, scheduledTime, eventType);
             } catch (Exception ex) {
-                logger.LogError(ex.Message);
-                logger.LogDebug(ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(ex.Message);
+                    logger.LogDebug(ex.StackTrace);
+                }
                 success = false;
             }
 
@@ -136,13 +140,17 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
                         _messageListStructure.Add(new List<Message>());
                     }
                     _currentSizeTotal = _currentSizeTotal + msg.Size;
-                    logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    if (!(logger is null)) {
+                        logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    }
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
 
                 List<Task> taskList = new List<Task>();
                 foreach (List<Message> l in _messageListStructure) {
-                    logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    if (!(logger is null)) {
+                        logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    }
                     taskList.Add(queueClient.SendAsync(l));
                 }
 
@@ -151,8 +159,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
 
                 success = true;
             } catch (Exception exception) {
-                logger.LogError(exception.Message);
-                logger.LogDebug(exception.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(exception.Message);
+                    logger.LogDebug(exception.StackTrace);
+                }
                 success = false;
             } finally {
                 // --- Close queue

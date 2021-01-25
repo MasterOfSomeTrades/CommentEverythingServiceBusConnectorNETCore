@@ -16,7 +16,7 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
         private string SubscriptionName;
         private Dictionary<string, List<string>> MessagesListedBySession = new Dictionary<string, List<string>>();
 
-        private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
+        //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
         private int _concurrentSessions;
         private int _sessionsInitializedCount = 0;
@@ -34,7 +34,9 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                 try {
                     await subscriptionClient.CloseAsync();
                 } catch (Exception ex) {
-                    logger.LogWarning(ex.Message);
+                    if (!(logger is null)) {
+                        logger.LogWarning(ex.Message);
+                    }
                 }
                 subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
 
@@ -56,9 +58,9 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             _concurrentSessions = concurrentSessions;
             _autoTryReconnect = autoTryReconnect;
 
-            if (logger is null) {
+            /*if (logger is null) {
                 logger = loggerFactory.CreateLogger<SubscriptionReceiver>();
-            }
+            }*/
         }
 
         public void Listen() {
@@ -115,8 +117,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                         try {
                             ProcessMessagesWhenLastReceived(session, MessagesListedBySession[session.SessionId], msg);
                         } catch (Exception ex) {
-                            logger.LogError(ex.Message);
-                            logger.LogDebug(ex.StackTrace);
+                            if (!(logger is null)) {
+                                logger.LogError(ex.Message);
+                                logger.LogDebug(ex.StackTrace);
+                            }
                         } finally {
                             MessagesListedBySession.Remove(session.SessionId);
                         }
@@ -126,8 +130,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
                 //await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken)).ContinueWith((t) => sLock.Release());
                 await session.CompleteAsync(fullList.Select(m => m.SystemProperties.LockToken));
             } catch (Exception ex) {
-                logger.LogError(ex.Message);
-                logger.LogDebug(ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(ex.Message);
+                    logger.LogDebug(ex.StackTrace);
+                }
                 //throw new ApplicationException(ex.Message + ex.StackTrace);
             }
         }
@@ -139,8 +145,10 @@ namespace CommentEverythingServiceBusConnectorLib.Topic
             string exMsg = exceptionReceivedEventArgs.Exception.Message;
             string stackTrace = exceptionReceivedEventArgs.Exception.StackTrace;
 
-            logger.LogError(exMsg);
-            logger.LogDebug(stackTrace);
+            if (!(logger is null)) {
+                logger.LogError(exMsg);
+                logger.LogDebug(stackTrace);
+            }
 
             return Task.CompletedTask;
         }

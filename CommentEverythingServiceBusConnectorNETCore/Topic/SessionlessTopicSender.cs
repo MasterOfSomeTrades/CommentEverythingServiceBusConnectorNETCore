@@ -6,8 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorNETCore.Topic
-{
+namespace CommentEverythingServiceBusConnectorNETCore.Topic {
     public class SessionlessTopicSender {
         protected SessionlessTopicSender() {
             // --- Must use parameterized constructor
@@ -24,9 +23,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             ServiceBusConnectionString = connectionString;
             TopicName = topic;
 
-            if (logger is null) {
+            /*if (logger is null) {
                 logger = loggerFactory.CreateLogger<SessionlessTopicSender>();
-            }
+            }*/
         }
 
         public SessionlessTopicSender(string connectionString, string topic, ILogger log) {
@@ -44,7 +43,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         //private List<List<Message>> _messageListStructure = new List<List<Message>>();
         private long _currentSizeTotal = 0;
 
-        private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
+        //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
 
         /// <summary>
@@ -60,8 +59,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             try {
                 success = await Send(new string[] { message }, groupId, context, DateTime.MinValue, eventType);
             } catch (Exception ex) {
-                logger.LogError(ex.Message);
-                logger.LogDebug(ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(ex.Message);
+                    logger.LogDebug(ex.StackTrace);
+                }
                 success = false;
             }
 
@@ -83,8 +84,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             try {
                 success = await Send(new string[] { message }, groupId, context, scheduledTime, eventType);
             } catch (Exception ex) {
-                logger.LogError(ex.Message);
-                logger.LogDebug(ex.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(ex.Message);
+                    logger.LogDebug(ex.StackTrace);
+                }
                 success = false;
             }
 
@@ -140,13 +143,17 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                         _messageListStructure.Add(new List<Message>());
                     }
                     _currentSizeTotal = _currentSizeTotal + msg.Size;
-                    logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    if (!(logger is null)) {
+                        logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    }
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
 
                 List<Task> taskList = new List<Task>();
                 foreach (List<Message> l in _messageListStructure) {
-                    logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    if (!(logger is null)) {
+                        logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    }
                     taskList.Add(queueClient.SendAsync(l));
                 }
 
@@ -183,31 +190,35 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
                 // --- Loop through message IList
                 //foreach (string m in messages) {
-                    messageCount = messageCount + 1;
-                    Message msg = new Message(Encoding.UTF8.GetBytes(message)) {
-                        CorrelationId = context
-                    };
+                messageCount = messageCount + 1;
+                Message msg = new Message(Encoding.UTF8.GetBytes(message)) {
+                    CorrelationId = context
+                };
 
-                    msg.UserProperties.Add("CollectionId", groupId);
-                    msg.UserProperties.Add("Count", collectionMessagesCount);
-                    msg.UserProperties.Add("Context", context);
-                    msg.UserProperties.Add("EventType", eventType);
-                    msg.MessageId = messageIdOverride;
-                    if (scheduledTime != DateTime.MinValue) {
-                        msg.ScheduledEnqueueTimeUtc = scheduledTime;
-                    }
-                    if (_currentSizeTotal + msg.Size > 100000) {
-                        _currentSizeTotal = 0;
-                        _messageListStructure.Add(new List<Message>());
-                    }
-                    _currentSizeTotal = _currentSizeTotal + msg.Size;
+                msg.UserProperties.Add("CollectionId", groupId);
+                msg.UserProperties.Add("Count", collectionMessagesCount);
+                msg.UserProperties.Add("Context", context);
+                msg.UserProperties.Add("EventType", eventType);
+                msg.MessageId = messageIdOverride;
+                if (scheduledTime != DateTime.MinValue) {
+                    msg.ScheduledEnqueueTimeUtc = scheduledTime;
+                }
+                if (_currentSizeTotal + msg.Size > 100000) {
+                    _currentSizeTotal = 0;
+                    _messageListStructure.Add(new List<Message>());
+                }
+                _currentSizeTotal = _currentSizeTotal + msg.Size;
+                if (!(logger is null)) {
                     logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
-                    _messageListStructure[_messageListStructure.Count - 1].Add(msg);
+                }
+                _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 //}
 
                 List<Task> taskList = new List<Task>();
                 foreach (List<Message> l in _messageListStructure) {
-                    logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    if (!(logger is null)) {
+                        logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    }
                     await _semaphore.WaitAsync();
                     taskList.Add(queueClient.SendAsync(l).ContinueWith((t) => _semaphore.Release()));
                 }
@@ -217,8 +228,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
 
                 success = true;
             } catch (Exception exception) {
-                logger.LogError(exception.Message);
-                logger.LogDebug(exception.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(exception.Message);
+                    logger.LogDebug(exception.StackTrace);
+                }
                 success = false;
             } finally {
                 // --- Close queue

@@ -1,5 +1,5 @@
-﻿using CommentEverythingServiceBusConnectorLib.Topic;
-using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
+﻿using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
+using CommentEverythingServiceBusConnectorNETCore.Topic;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;

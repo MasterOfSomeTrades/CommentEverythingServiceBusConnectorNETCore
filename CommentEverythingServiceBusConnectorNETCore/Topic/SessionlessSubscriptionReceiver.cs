@@ -20,7 +20,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
         private ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _processedMessagesDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, byte>>();
         private ConcurrentDictionary<string, short> _processedSessionsDictionary = new ConcurrentDictionary<string, short>();
 
-        private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
+        //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
         private int _concurrentSessions;
         private int _sessionsInitializedCount = 0;
@@ -43,7 +43,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                 try {
                     await subscriptionClient.CloseAsync();
                 } catch (Exception ex) {
-                    logger.LogWarning(ex.Message);
+                    if (!(logger is null)) {
+                        logger.LogWarning(ex.Message);
+                    }
                 }
                 subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
 
@@ -76,9 +78,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             _autoTryReconnect = autoTryReconnect;
             _messageLockMinutes = messageLockMinutes;
 
-            if (logger is null) {
+            /*if (logger is null) {
                 logger = loggerFactory.CreateLogger<SessionlessSubscriptionReceiver>();
-            }
+            }*/
         }
 
         public async void Listen() {
@@ -142,12 +144,15 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
                     if (removedDictionary.Count > 0) {
                         processedMessagesList = removedDictionary.Values.ToList();
                     }
-
-                    logger.LogInformation(String.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
+                    if (!(logger is null)) {
+                        logger.LogInformation(String.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
+                    }
                     await ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
                 }
 
-                logger.LogInformation(String.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
+                if (!(logger is null)) {
+                    logger.LogInformation(String.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
+                }
             } catch (Exception ex) {
                 await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
                 //logger.LogError(ex.Message + ex.StackTrace);
@@ -161,8 +166,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic
             string exMsg = exceptionReceivedEventArgs.Exception.Message;
             string stackTrace = exceptionReceivedEventArgs.Exception.StackTrace;
 
-            logger.LogError(exMsg);
-            logger.LogDebug(stackTrace);
+            if (!(logger is null)) {
+                logger.LogError(exMsg);
+                logger.LogDebug(stackTrace);
+            }
 
             return Task.CompletedTask;
         }

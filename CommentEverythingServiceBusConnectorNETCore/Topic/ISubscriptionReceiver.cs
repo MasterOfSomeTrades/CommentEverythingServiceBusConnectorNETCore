@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.ServiceBus;
-using Microsoft.Azure.WebJobs;
 using System;
 using System.Collections.Generic;
 using System.Text;

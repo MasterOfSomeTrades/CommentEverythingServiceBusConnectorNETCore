@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.0.0</version>
+    <version>8.0.1</version>
     <title>CommentEverythingServiceBusConnectorNETCore</title>
     <authors>Comment Everything</authors>
     <owners>Comment Everything</owners>
@@ -12,5 +12,8 @@
     <releaseNotes>Added Topic reading and writing.</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>Microsoft Azure ServiceBus Topics Queues</tags>
+	<dependencies>
+      <group targetFramework="netcoreapp3.1" />
+    </dependencies>
   </metadata>
 </package>

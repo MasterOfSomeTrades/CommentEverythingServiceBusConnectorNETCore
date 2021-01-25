@@ -1,35 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyName>CommentEverythingServiceBusConnectorNETCore</AssemblyName>
-    <RootNamespace>CommentEverythingServiceBusConnectorNETCore</RootNamespace>
-    <Company>Comment Everything</Company>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Version>8.2.1</Version>
     <Authors>Comment Everything</Authors>
-    <Copyright>Copyright 2020</Copyright>
+    <Company>Comment Everything</Company>
     <Description>Connector for Microsoft Service Bus (Read and write to Topics and Queues). Makes reading and writing easier via batching and standardized methods.</Description>
-    <PackageProjectUrl />
+    <Copyright>2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Update Microsoft library versions</PackageReleaseNotes>
-    <Version>7.3.0</Version>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>7.3.0.0</AssemblyVersion>
-    <FileVersion>7.3.0.0</FileVersion>
+    <PackageReleaseNotes>Use NET Core 3.1 compatible redis library</PackageReleaseNotes>
+    <PackageId>CommentEverythingServiceBusConnectorNETCore</PackageId>
+    <Product>CommentEverythingServiceBusConnectorNETCore</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommentEverythingAPIConnectionNETCore" Version="3.4.1" />
-    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="4.1.3" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="3.0.2" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.8.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.1.2" />
+    <PackageReference Include="CommentEverythingAPIConnectionNETCore" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.1.1" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="4.0.1" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.2.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.ServiceBus" Version="3.0.0-beta8" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>

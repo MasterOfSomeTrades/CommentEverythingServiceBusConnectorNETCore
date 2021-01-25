@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorLib.Queue
-{
+namespace CommentEverythingServiceBusConnectorNETCore.Queue {
     public class QueueBatchSender {
         private QueueBatchSender() {
             // --- Use parameterized constructor
@@ -15,8 +14,17 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
         public QueueBatchSender(string connectionString, string toQueue) {
             ServiceBusConnectionString = connectionString;
             QueueName = toQueue;
-            if (logger is null) {
+            /*if (logger is null) {
                 logger = loggerFactory.CreateLogger<QueueBatchSender>();
+            }*/
+
+        }
+
+        public QueueBatchSender(string connectionString, string toQueue, ILogger log) {
+            ServiceBusConnectionString = connectionString;
+            QueueName = toQueue;
+            if (logger is null) {
+                logger = log;
             }
 
         }
@@ -27,7 +35,7 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
         private List<List<Message>> _messageListStructure = new List<List<Message>>();
         private long _currentSizeTotal = 0;
 
-        private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
+        //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
         private ILogger logger = null;
 
         public async Task<bool> Send(string msg, string groupId, string context) {
@@ -54,8 +62,10 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
                 // Send the message to the queue.
                 await queueClient.SendAsync(message);
             } catch (Exception exception) {
-                logger.LogError(exception.Message + exception.StackTrace);
-                throw new ApplicationException(exception.Message);
+                if (!(logger is null)) {
+                    logger.LogError($"{exception.Message} {exception.StackTrace}");
+                }
+                throw new ApplicationException($"{exception.Message} {exception.StackTrace}");
             }
         }
 
@@ -89,13 +99,17 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
                         _messageListStructure.Add(new List<Message>());
                     }
                     _currentSizeTotal = _currentSizeTotal + msg.Size;
-                    logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    if (!(logger is null)) {
+                        logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    }
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
 
                 List<Task> taskList = new List<Task>();
                 foreach (List<Message> l in _messageListStructure) {
-                    logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    if (!(logger is null)) {
+                        logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    }
                     taskList.Add(queueClient.SendAsync(l));
                 }
                 // --- Send the Messages to the queue.
@@ -106,7 +120,9 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
 
                 return true;
             } catch (Exception exception) {
-                logger.LogError(exception.Message + exception.StackTrace);
+                if (!(logger is null)) {
+                    logger.LogError(exception.Message + exception.StackTrace);
+                }
                 throw new ApplicationException(exception.Message);
             }
         }

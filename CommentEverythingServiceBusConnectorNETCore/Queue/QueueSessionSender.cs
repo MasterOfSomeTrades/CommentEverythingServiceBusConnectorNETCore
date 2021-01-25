@@ -1,21 +1,19 @@
 ﻿using Microsoft.Azure.ServiceBus;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommentEverythingServiceBusConnectorLib.Queue
-{
+namespace CommentEverythingServiceBusConnectorNETCore.Queue {
     public class QueueSessionSender : QueueBatchSender {
         public QueueSessionSender(string connectionString, string toQueue) : base(connectionString, toQueue) {
             ServiceBusConnectionString = connectionString;
             QueueName = toQueue;
 
-            if (logger is null) {
+            /*if (logger is null) {
                 logger = loggerFactory.CreateLogger<QueueBatchSender>();
-            }
-
+            }*/
+            throw new Exception("QueueSessionSender has been deprecated");
         }
 
         string ServiceBusConnectionString;
@@ -24,8 +22,8 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
         private List<List<Message>> _messageListStructure = new List<List<Message>>();
         private long _currentSizeTotal = 0;
 
-        private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
-        private ILogger logger = null;
+        //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
+        //private ILogger logger = null;
 
         protected override async Task<bool> SendMessagesAsync(IList<string> msgs, string correlation, string usage) {
             try {
@@ -57,13 +55,13 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
                         _messageListStructure.Add(new List<Message>());
                     }
                     _currentSizeTotal = _currentSizeTotal + msg.Size;
-                    logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    //logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
 
                 List<Task> taskList = new List<Task>();
                 foreach (List<Message> l in _messageListStructure) {
-                    logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
+                    //logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
                     taskList.Add(queueClient.SendAsync(l));
                 }
 
@@ -75,7 +73,7 @@ namespace CommentEverythingServiceBusConnectorLib.Queue
 
                 return true;
             } catch (Exception exception) {
-                logger.LogError(exception.Message + exception.StackTrace);
+                //logger.LogError(exception.Message + exception.StackTrace);
                 throw new ApplicationException(exception.Message);
             }
         }

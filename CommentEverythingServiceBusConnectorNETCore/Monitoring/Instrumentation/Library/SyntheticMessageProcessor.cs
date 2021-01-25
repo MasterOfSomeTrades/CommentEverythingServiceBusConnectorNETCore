@@ -21,9 +21,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
         /// <param name="servicebusConnectionStr">Azure Service Bus connection string</param>
         /// <param name="monitoringTopic">Monitoring topic name to which synthetic messages should be forwarded</param>
         /// <param name="log">Log to write errors and warnings</param>
-        public SyntheticMessageProcessor(string servicebusConnectionStr, string monitoringTopic, ILogger log) {
+        public SyntheticMessageProcessor(string servicebusConnectionStr, string monitoringTopic, ILogger log) : base(log) {
             if (ts is null) {
-                ts = new SessionlessTopicSender(servicebusConnectionStr, monitoringTopic);
+                ts = new SessionlessTopicSender(servicebusConnectionStr, monitoringTopic, log);
             }
             if (_logger is null) {
                 _logger = log;
