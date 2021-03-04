@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>8.2.1</Version>
+    <Version>8.2.2</Version>
     <Authors>Comment Everything</Authors>
     <Company>Comment Everything</Company>
     <Description>Connector for Microsoft Service Bus (Read and write to Topics and Queues). Makes reading and writing easier via batching and standardized methods.</Description>
@@ -11,19 +11,20 @@
     <RepositoryUrl>https://github.com/MasterOfSomeTrades/CommentEverythingServiceBusConnectorNETCore.git</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Microsoft Azure ServiceBus Topics Queues</PackageTags>
-    <PackageReleaseNotes>Use NET Core 3.1 compatible redis library</PackageReleaseNotes>
+    <PackageReleaseNotes>Update libraries</PackageReleaseNotes>
     <PackageId>CommentEverythingServiceBusConnectorNETCore</PackageId>
     <Product>CommentEverythingServiceBusConnectorNETCore</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>8.2.2.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommentEverythingAPIConnectionNETCore" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.1.1" />
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.1.2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="4.0.1" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.2.1" />
     <PackageReference Include="Microsoft.Azure.WebJobs.ServiceBus" Version="3.0.0-beta8" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.0-preview.1.21103.6" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
