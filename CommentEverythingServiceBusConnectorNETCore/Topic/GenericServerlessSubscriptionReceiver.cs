@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CommentEverythingServiceBusConnectorLib.Topic {
-    class GenericServerlessSubscriptionReceiver : ServerlessSubscriptionReceiver {
+    public class GenericServerlessSubscriptionReceiver : ServerlessSubscriptionReceiver {
         private static ILogger _logger;
         private IMessageCollectionProcessor _commonProcessor;
 
