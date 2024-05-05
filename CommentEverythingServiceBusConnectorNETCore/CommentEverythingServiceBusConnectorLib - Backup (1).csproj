@@ -2,7 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Version>10.2.0</Version>
+<<<<<<< Updated upstream
+    <Version>10.1.0</Version>
+=======
+    <Version>9.0.9</Version>
+>>>>>>> Stashed changes
     <Authors>Comment Everything</Authors>
     <Company>Comment Everything</Company>
     <Description>Connector for Microsoft Service Bus (Read and write to Topics and Queues). Makes reading and writing easier via batching and standardized methods.</Description>
@@ -21,10 +25,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.5" />
     <PackageReference Include="CommentEverythingAPIConnectionNETCore" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.39" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.15.1" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0-preview.3.24172.13" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>

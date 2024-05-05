@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System;
@@ -63,27 +64,27 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             _listenerGroupId = listenerGroupIdentifier;
         }
 
-        public abstract Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8);
-        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
-        public abstract Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, Message lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8);
+        public abstract Task<string> ProcessMessage(ServiceBusMessage messageAsObject, string messageAsUTF8);
+        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
+        public abstract Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8);
         static IDatabase cache = lazyConnection.Value.GetDatabase();
 
-        public async Task OnMessage(Message messageToHandle) {
+        public async Task OnMessage(ServiceBusMessage messageToHandle) {
             try {
                 // --- Define groupId
                 if (!(logger is null)) {
                     logger.LogInformation("Processing message in OnMessage(Message messageToHandle)");
                 }
                 string subContextString = "";
-                if (messageToHandle.UserProperties.Keys.Contains("SubContext")) {
-                    subContextString = $"|{messageToHandle.UserProperties["SubContext"].ToString()}";
+                if (messageToHandle.ApplicationProperties.Keys.Contains("SubContext")) {
+                    subContextString = $"|{messageToHandle.ApplicationProperties["SubContext"].ToString()}";
                 }
-                string groupId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{messageToHandle.UserProperties["EventType"].ToString()}|{_listenerGroupId}{subContextString}";
-                string collectionId = $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{_listenerGroupId}";
+                string groupId = $"{messageToHandle.ApplicationProperties["CollectionId"].ToString()}|{messageToHandle.ApplicationProperties["EventType"].ToString()}|{_listenerGroupId}{subContextString}";
+                string collectionId = $"{messageToHandle.ApplicationProperties["CollectionId"].ToString()}|{_listenerGroupId}";
 
                 // --- If no events listed, default to only EventType
                 if (_eventsToReceive.Count == 0) {
-                    _eventsToReceive.Add(messageToHandle.UserProperties["EventType"].ToString());
+                    _eventsToReceive.Add(messageToHandle.ApplicationProperties["EventType"].ToString());
                 }
                 if (!(logger is null)) {
                     logger.LogInformation($"Setting redis keys for message processing with groupId {groupId}");
@@ -111,7 +112,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
                 string dataJSON = Encoding.UTF8.GetString(messageToHandle.Body);
 
-                int totalMessagesCount = int.Parse(messageToHandle.UserProperties["Count"].ToString());
+                int totalMessagesCount = int.Parse(messageToHandle.ApplicationProperties["Count"].ToString());
                 if (!(logger is null)) {
                     logger.LogInformation("Running ProcessMessage(...)");
                 }
@@ -161,12 +162,12 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                         //_processedMessagesHolder.TryRemove(groupId, out removedDictionary);
 
                         if (!(logger is null)) {
-                            logger.LogInformation(string.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
+                            logger.LogInformation(string.Format("====== PROCESSING GROUP OF {0} MESSAGES FOR {1} ======", totalMessagesCount.ToString(), messageToHandle.ApplicationProperties["CollectionId"].ToString()));
                         }
                         await ProcessMessagesWhenLastReceived(messagesList, messageToHandle, processedMessagesList);
 
                         // --- Add to Events Received for Parent Collection
-                        await cache.SetAddAsync($"{collectionId}|EventsReceived", messageToHandle.UserProperties["EventType"].ToString());
+                        await cache.SetAddAsync($"{collectionId}|EventsReceived", messageToHandle.ApplicationProperties["EventType"].ToString());
                         await cache.KeyExpireAsync($"{collectionId}|EventsReceived", new TimeSpan(0, 30, 0));
 
                         bool AllEventsReceived = true;
@@ -190,18 +191,18 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                                 // --- Get original messages list
                                 IList<string> eventOriginalMessagesList = new List<string>();
                                 //RedisValue[] eventOriginalMessagesArray = await cache.SetMembersAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
-                                RedisValue[] eventOriginalMessagesArray = await cache.SetMembersAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}|messageHolder");
+                                RedisValue[] eventOriginalMessagesArray = await cache.SetMembersAsync($"{messageToHandle.ApplicationProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}|messageHolder");
                                 foreach (RedisValue rv in eventOriginalMessagesArray) {
                                     eventOriginalMessagesList.Add(rv.ToString());
                                 }
                                 originalMessagesDictionary.Add(e, eventOriginalMessagesList);
                                 //await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|messageHolder");
-                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}|messageHolder");
+                                await cache.KeyDeleteAsync($"{messageToHandle.ApplicationProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}|messageHolder");
 
                                 // --- Get processed messages list
                                 IList<string> eventProcessedMessagesList = new List<string>();
                                 //HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
-                                HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}");
+                                HashEntry[] eventProcessedMessagesHash = await cache.HashGetAllAsync($"{messageToHandle.ApplicationProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}");
                                 if (eventProcessedMessagesHash.Length > 0) {
                                     foreach (HashEntry he in eventProcessedMessagesHash) {
                                         eventProcessedMessagesList.Add(he.Value.ToString());
@@ -210,9 +211,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                                 processedMessagesDictionary.Add(e, eventProcessedMessagesList);
 
                                 //await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
-                                await cache.KeyDeleteAsync($"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}");
+                                await cache.KeyDeleteAsync($"{messageToHandle.ApplicationProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}");
                                 //await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}");
-                                await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.UserProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}");
+                                await cache.HashDeleteAsync("ServerlessTopicMessagesProcessed", $"{messageToHandle.ApplicationProperties["CollectionId"].ToString()}|{e}|{_listenerGroupId}{subContextString}");
                             }
 
                             await ProcessCollectionMessagesWhenAllReceived(originalMessagesDictionary, messageToHandle, processedMessagesDictionary);
@@ -221,25 +222,12 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 }
 
                 if (!(logger is null)) {
-                    logger.LogInformation(string.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.UserProperties["CollectionId"].ToString()));
+                    logger.LogInformation(string.Format("----- Processed message {0} of {1} for {2} -----", processedMessagesCount.ToString(), totalMessagesCount.ToString(), messageToHandle.ApplicationProperties["CollectionId"].ToString()));
                 }
             } catch (Exception ex) {
                 //await subscriptionClient.AbandonAsync(messageToHandle.SystemProperties.LockToken);
                 throw new ApplicationException($"Error in reading messages - {ex.Message} {ex.StackTrace}");
             }
-        }
-
-        Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs) {
-            var context = exceptionReceivedEventArgs.ExceptionReceivedContext;
-            string exMsg = exceptionReceivedEventArgs.Exception.Message;
-            string stackTrace = exceptionReceivedEventArgs.Exception.StackTrace;
-
-            if (!(logger is null)) {
-                logger.LogError(exMsg);
-                logger.LogDebug(stackTrace);
-            }
-
-            return Task.CompletedTask;
         }
     }
 }
