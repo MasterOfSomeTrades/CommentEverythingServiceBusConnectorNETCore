@@ -51,10 +51,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         /// <param name="groupId"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public async Task<bool> Send(string message, string groupId, string context = "", string eventType = "") {
+        public async Task<bool> Send(string message, string groupId, string context = "", string eventType = "", string subContext = "") {
             bool success = false;
             try {
-                success = await Send(new string[] { message }, groupId, context, DateTime.MinValue, eventType);
+                success = await Send(new string[] { message }, groupId, context, DateTime.MinValue, eventType, subContext);
             } catch (Exception ex) {
                 if (!(logger is null)) {
                     logger.LogError(ex.Message);
@@ -76,10 +76,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         /// <param name="context">Used as CorrelationId and UserProperty['Context'] to filter messages</param>
         /// <param name="scheduledTime">DateTime in UTC to write to topic</param>
         /// <returns></returns>
-        public async Task<bool> Send(string message, string groupId, string context, DateTime scheduledTime, string eventType = "") {
+        public async Task<bool> Send(string message, string groupId, string context, DateTime scheduledTime, string eventType = "", string subContext = "") {
             bool success = false;
             try {
-                success = await Send(new string[] { message }, groupId, context, scheduledTime, eventType);
+                success = await Send(new string[] { message }, groupId, context, scheduledTime, eventType, subContext);
             } catch (Exception ex) {
                 if (!(logger is null)) {
                     logger.LogError(ex.Message);
@@ -100,7 +100,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         /// <param name="groupId">Session Id</param>
         /// <param name="context">Used as CorrelationId and UserProperty['Context'] to filter messages</param>
         /// <returns>Success (true or false)</returns>
-        public async Task<bool> Send(IList<string> messages, string groupId, string context, DateTime scheduledTime, string eventType = "") {
+        public async Task<bool> Send(IList<string> messages, string groupId, string context, DateTime scheduledTime, string eventType = "", string subContext = "") {
             bool success = false;
 
             try {
@@ -131,6 +131,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                     msg.UserProperties.Add("Count", messages.Count);
                     msg.UserProperties.Add("Context", context);
                     msg.UserProperties.Add("EventType", eventType);
+                    msg.UserProperties.Add("SubContext", subContext);
                     msg.MessageId = Guid.NewGuid().ToString("D");
                     if (scheduledTime != DateTime.MinValue) {
                         msg.ScheduledEnqueueTimeUtc = scheduledTime;
