@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CommentEverythingServiceBusConnectorNETCore.Topic {
     public interface ISubscriptionReceiver {
-        Task<string> ProcessMessage(ServiceBusMessage messageAsObject, string messageAsUTF8);
-        Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
+        Task<string> ProcessMessage(ServiceBusReceivedMessage messageAsObject, string messageAsUTF8);
+        Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusReceivedMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
     }
 }

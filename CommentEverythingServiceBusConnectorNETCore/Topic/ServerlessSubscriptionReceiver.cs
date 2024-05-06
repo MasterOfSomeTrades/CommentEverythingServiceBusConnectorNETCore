@@ -64,12 +64,12 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             _listenerGroupId = listenerGroupIdentifier;
         }
 
-        public abstract Task<string> ProcessMessage(ServiceBusMessage messageAsObject, string messageAsUTF8);
-        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
-        public abstract Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8);
+        public abstract Task<string> ProcessMessage(ServiceBusReceivedMessage messageAsObject, string messageAsUTF8);
+        public abstract Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusReceivedMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8);
+        public abstract Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusReceivedMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8);
         static IDatabase cache = lazyConnection.Value.GetDatabase();
 
-        public async Task OnMessage(ServiceBusMessage messageToHandle) {
+        public async Task OnMessage(ServiceBusReceivedMessage messageToHandle) {
             try {
                 // --- Define groupId
                 if (!(logger is null)) {

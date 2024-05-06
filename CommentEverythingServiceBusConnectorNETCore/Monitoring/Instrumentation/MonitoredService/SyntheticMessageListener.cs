@@ -29,7 +29,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
         private static string _monitoringTopic;
         private static ILogger _logger;
         private static SessionlessTopicSender ts = null;
-        public Task OnMessage(ServiceBusMessage theMessage) {
+        public Task OnMessage(ServiceBusReceivedMessage theMessage) {
             Task returnTask;
 
             try {

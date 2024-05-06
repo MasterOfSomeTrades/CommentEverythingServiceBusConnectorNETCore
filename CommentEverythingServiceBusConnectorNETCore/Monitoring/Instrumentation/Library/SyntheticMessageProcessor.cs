@@ -31,7 +31,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
             }
         }
 
-        public override Task<string> ProcessMessage(ServiceBusMessage messageAsObject, string messageAsUTF8) {
+        public override Task<string> ProcessMessage(ServiceBusReceivedMessage messageAsObject, string messageAsUTF8) {
             Task<string> returnTask;
 
             try {
@@ -48,7 +48,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
             return returnTask;
         }
 
-        public override Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8) {
+        public override Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusReceivedMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8) {
             Task returnTask;
 
             try {
@@ -63,7 +63,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
             return returnTask;
         }
 
-        public override Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8) {
+        public override Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusReceivedMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8) {
             // --- Do nothing
             return Task.CompletedTask;
         }

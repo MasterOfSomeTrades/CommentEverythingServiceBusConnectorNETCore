@@ -9,6 +9,6 @@ using System.Threading.Tasks;
 namespace CommentEverythingServiceBusConnectorLib.Topic {
     public interface IMessageCollectionProcessor {
         public IMessageCollectionProcessor Setup(ILogger logger);
-        public Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8);
+        public Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusReceivedMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8);
     }
 }

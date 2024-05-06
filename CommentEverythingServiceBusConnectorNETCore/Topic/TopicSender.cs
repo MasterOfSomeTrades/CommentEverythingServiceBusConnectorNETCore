@@ -37,7 +37,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
         string ServiceBusConnectionString;
         string TopicName;
-        private ITopicClient queueClient;
+        private ServiceBusClient queueClient;
+        private ServiceBusSender queueSender;
         private List<List<ServiceBusMessage>> _messageListStructure = new List<List<ServiceBusMessage>>();
         private long _currentSizeTotal = 0;
 
@@ -105,7 +106,10 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             bool success = false;
 
             try {
-                queueClient = new TopicClient(ServiceBusConnectionString, TopicName);
+                // --- Create ServiceBusClient
+                queueClient = new ServiceBusClient(ServiceBusConnectionString);
+                // Create the sender
+                queueSender = queueClient.CreateSender(TopicName);
 
                 // --- Setup
                 _messageListStructure = new List<List<ServiceBusMessage>>();
@@ -135,7 +139,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                     msg.ApplicationProperties.Add("SubContext", subContext);
                     msg.MessageId = Guid.NewGuid().ToString("D");
                     if (scheduledTime != DateTime.MinValue) {
-                        msg.ScheduledEnqueueTimeUtc = scheduledTime;
+                        msg.ScheduledEnqueueTime = scheduledTime;
                     }
                     /*
                     if (_currentSizeTotal + msg.Size > 100000) {
@@ -155,7 +159,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                     if (!(logger is null)) {
                         logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
                     }
-                    taskList.Add(queueClient.SendAsync(l));
+                    taskList.Add(queueSender.SendMessagesAsync(l));
                 }
 
                 // --- Send the Messages to the queue.

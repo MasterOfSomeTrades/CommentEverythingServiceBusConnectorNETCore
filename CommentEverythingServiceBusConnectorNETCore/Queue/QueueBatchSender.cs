@@ -32,7 +32,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
 
         string ServiceBusConnectionString;
         string QueueName;
-        private ServiceBusSender queueClient;
+        private ServiceBusClient queueClient;
+        private ServiceBusSender queueSender;
         private List<List<ServiceBusMessage>> _messageListStructure = new List<List<ServiceBusMessage>>();
         private long _currentSizeTotal = 0;
 
@@ -49,7 +50,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
             bool ret = false;
 
             // --- Open TopicClient
-            queueClient = new ServiceBusClient(ServiceBusConnectionString, QueueName);
+            queueClient = new ServiceBusClient(ServiceBusConnectionString);
+            queueSender = queueClient.CreateSender(QueueName);
 
             ret = await SendMessagesAsync(msgs, groupId, context);
 
@@ -61,7 +63,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
                 var message = new ServiceBusMessage(Encoding.UTF8.GetBytes(msg));
 
                 // Send the message to the queue.
-                await queueClient.SendMessageAsync(message);
+                await queueSender.SendMessageAsync(message);
             } catch (Exception exception) {
                 if (!(logger is null)) {
                     logger.LogError($"{exception.Message} {exception.StackTrace}");
@@ -111,7 +113,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
                     if (!(logger is null)) {
                         logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
                     }
-                    taskList.Add(queueClient.SendMessagesAsync(l));
+                    taskList.Add(queueSender.SendMessagesAsync(l));
                 }
                 // --- Send the Messages to the queue.
                 await Task.WhenAll(taskList);

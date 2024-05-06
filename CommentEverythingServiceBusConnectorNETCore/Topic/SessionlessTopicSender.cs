@@ -40,7 +40,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
 
         string ServiceBusConnectionString;
         string TopicName;
-        private ServiceBusSender queueClient;
+        private ServiceBusClient queueClient;
+        private ServiceBusSender queueSender;
         //private List<List<Message>> _messageListStructure = new List<List<Message>>();
         private long _currentSizeTotal = 0;
 
@@ -108,10 +109,11 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             bool success = false;
 
             try {
-                queueClient = new TopicClient(ServiceBusConnectionString, TopicName);
+                queueClient = new ServiceBusClient(ServiceBusConnectionString);
+                queueSender = queueClient.CreateSender(TopicName);
 
                 // --- Setup
-                List<List<Message>> _messageListStructure = new List<List<ServiceBusMessage>>();
+                List<List<ServiceBusMessage>> _messageListStructure = new List<List<ServiceBusMessage>>();
                 _messageListStructure = new List<List<ServiceBusMessage>>();
                 _messageListStructure.Add(new List<ServiceBusMessage>());
                 _currentSizeTotal = 0;
@@ -158,7 +160,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                     if (!(logger is null)) {
                         logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
                     }
-                    taskList.Add(queueClient.SendMessagesAsync(l));
+                    taskList.Add(queueSender.SendMessagesAsync(l));
                 }
 
                 // --- Send the Messages to the queue.
@@ -183,7 +185,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
             bool success = false;
 
             try {
-                queueClient = new ServiceBusReceiver(ServiceBusConnectionString, TopicName);
+                queueClient = new ServiceBusClient(ServiceBusConnectionString);
+                queueSender = queueClient.CreateSender(TopicName);
 
                 // --- Setup
                 List<List<ServiceBusMessage>> _messageListStructure = new List<List<ServiceBusMessage>>();
@@ -225,7 +228,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                         logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
                     }
                     await _semaphore.WaitAsync();
-                    taskList.Add(queueClient.SendMessagesAsync(l).ContinueWith((t) => _semaphore.Release()));
+                    taskList.Add(queueSender.SendMessagesAsync(l).ContinueWith((t) => _semaphore.Release()));
                 }
 
                 // --- Send the Messages to the queue.
