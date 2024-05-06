@@ -1,4 +1,5 @@
-﻿using CommentEverythingServiceBusConnectorNETCore.Communications;
+﻿using Azure.Messaging.ServiceBus;
+using CommentEverythingServiceBusConnectorNETCore.Communications;
 using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
@@ -20,7 +21,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
                 _logger = log;
             }
         }
-        public Task OnMessage(Message theMessage, string slackWebhookToSendAlert, string slackChannelToSendAlert) {
+        public Task OnMessage(ServiceBusMessage theMessage, string slackWebhookToSendAlert, string slackChannelToSendAlert) {
             Task returnTask;
 
             try {

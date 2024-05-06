@@ -14,8 +14,8 @@
     <PackageReleaseNotes>Update libraries. Add generic receivers and collection processors.</PackageReleaseNotes>
     <PackageId>CommentEverythingServiceBusConnectorNETCore</PackageId>
     <Product>CommentEverythingServiceBusConnectorNETCore</Product>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>9.0.9.0</AssemblyVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyVersion>10.2.0.0</AssemblyVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <FileVersion>10.0.0.0</FileVersion>
   </PropertyGroup>

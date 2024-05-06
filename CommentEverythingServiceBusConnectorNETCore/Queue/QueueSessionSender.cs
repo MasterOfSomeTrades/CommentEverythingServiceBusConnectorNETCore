@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.ServiceBus;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,8 +19,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
 
         string ServiceBusConnectionString;
         string QueueName;
-        private IQueueClient queueClient;
-        private List<List<Message>> _messageListStructure = new List<List<Message>>();
+        private ServiceBusSender queueClient;
+        private List<List<ServiceBusMessage>> _messageListStructure = new List<List<ServiceBusMessage>>();
         private long _currentSizeTotal = 0;
 
         //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
@@ -28,41 +29,41 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
         protected override async Task<bool> SendMessagesAsync(IList<string> msgs, string correlation, string usage) {
             try {
                 // --- Setup
-                _messageListStructure = new List<List<Message>>();
-                _messageListStructure.Add(new List<Message>());
+                _messageListStructure = new List<List<ServiceBusMessage>>();
+                _messageListStructure.Add(new List<ServiceBusMessage>());
                 _currentSizeTotal = 0;
                 int messageCount = 0;
 
                 // --- Loop through message IList
                 foreach (string m in msgs) {
                     messageCount = messageCount + 1;
-                    Message msg = new Message(Encoding.UTF8.GetBytes(m)) {
+                    ServiceBusMessage msg = new ServiceBusMessage(Encoding.UTF8.GetBytes(m)) {
                         SessionId = correlation
                     };
                     if (messageCount == msgs.Count) {
-                        msg.Label = "last";
+                        msg.Subject = "last";
                     } else if (messageCount == 1) {
-                        msg.Label = "first";
+                        msg.Subject = "first";
                     } else {
-                        msg.Label = "interim";
+                        msg.Subject = "interim";
                     }
-                    msg.UserProperties.Add("CollectionId", correlation);
-                    msg.UserProperties.Add("Count", msgs.Count);
-                    msg.UserProperties.Add("Context", usage);
+                    msg.ApplicationProperties.Add("CollectionId", correlation);
+                    msg.ApplicationProperties.Add("Count", msgs.Count);
+                    msg.ApplicationProperties.Add("Context", usage);
                     msg.MessageId = Guid.NewGuid().ToString("D");
-                    if (_currentSizeTotal + msg.Size > 100000) {
+                    /*if (_currentSizeTotal + msg.Size > 100000) {
                         _currentSizeTotal = 0;
-                        _messageListStructure.Add(new List<Message>());
+                        _messageListStructure.Add(new List<ServiceBusMessage>());
                     }
                     _currentSizeTotal = _currentSizeTotal + msg.Size;
-                    //logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
+                    //logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());*/
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
 
                 List<Task> taskList = new List<Task>();
-                foreach (List<Message> l in _messageListStructure) {
+                foreach (List<ServiceBusMessage> l in _messageListStructure) {
                     //logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
-                    taskList.Add(queueClient.SendAsync(l));
+                    taskList.Add(queueClient.SendMessagesAsync(l));
                 }
 
                 // --- Send the Messages to the queue.

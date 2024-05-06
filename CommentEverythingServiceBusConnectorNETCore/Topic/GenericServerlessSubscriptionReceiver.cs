@@ -1,4 +1,5 @@
-﻿using CommentEverythingServiceBusConnectorNETCore.Topic;
+﻿using Azure.Messaging.ServiceBus;
+using CommentEverythingServiceBusConnectorNETCore.Topic;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System;
@@ -22,17 +23,17 @@ namespace CommentEverythingServiceBusConnectorLib.Topic {
             }
         }
 
-        public override Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8) {
+        public override Task<string> ProcessMessage(ServiceBusMessage messageAsObject, string messageAsUTF8) {
             // --- Do nothing
             return Task.FromResult(messageAsUTF8);
         }
 
-        public override Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8) {
+        public override Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8) {
             // --- Do nothing
             return Task.CompletedTask;
         }
 
-        public override Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, Message lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8) {
+        public override Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8) {
             Task returnTask;
 
             try {

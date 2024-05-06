@@ -1,4 +1,5 @@
-﻿using CommentEverythingServiceBusConnectorNETCore.Monitoring.Exceptions;
+﻿using Azure.Messaging.ServiceBus;
+using CommentEverythingServiceBusConnectorNETCore.Monitoring.Exceptions;
 using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
 using CommentEverythingServiceBusConnectorNETCore.Topic;
 using Microsoft.Azure.ServiceBus;
@@ -30,7 +31,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
             }
         }
 
-        public override Task<string> ProcessMessage(Message messageAsObject, string messageAsUTF8) {
+        public override Task<string> ProcessMessage(ServiceBusMessage messageAsObject, string messageAsUTF8) {
             Task<string> returnTask;
 
             try {
@@ -47,11 +48,11 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
             return returnTask;
         }
 
-        public override Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, Message lastMessage, IList<string> listOfProcessedMessagesAsUTF8) {
+        public override Task ProcessMessagesWhenLastReceived(IList<string> listOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, IList<string> listOfProcessedMessagesAsUTF8) {
             Task returnTask;
 
             try {
-                Task sendTask = ts.Send(listOfProcessedMessagesAsUTF8, lastMessage.UserProperties["CollectionId"].ToString(), lastMessage.UserProperties["Context"].ToString(), DateTime.MinValue, "LAST_SYNTHETIC_MESSAGE_PUBLISHED");
+                Task sendTask = ts.Send(listOfProcessedMessagesAsUTF8, lastMessage.ApplicationProperties["CollectionId"].ToString(), lastMessage.ApplicationProperties["Context"].ToString(), DateTime.MinValue, "LAST_SYNTHETIC_MESSAGE_PUBLISHED");
                 returnTask = Task.WhenAll(new Task[] { sendTask });
             } catch (Exception ex) {
                 MonitoringException exp = new MonitoringException($"ERROR in synthetic monitoring service - unable to process group of synthetic messages caused by {ex.Message}");
@@ -62,7 +63,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
             return returnTask;
         }
 
-        public override Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, Message lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8) {
+        public override Task ProcessCollectionMessagesWhenAllReceived(Dictionary<string, IList<string>> dictionaryOfOriginalMessagesAsUTF8, ServiceBusMessage lastMessage, Dictionary<string, IList<string>> dictionaryOfProcessedMessagesAsUTF8) {
             // --- Do nothing
             return Task.CompletedTask;
         }

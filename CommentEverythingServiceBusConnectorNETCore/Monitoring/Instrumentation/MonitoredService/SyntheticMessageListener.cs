@@ -1,4 +1,5 @@
-﻿using CommentEverythingServiceBusConnectorNETCore.Monitoring.Exceptions;
+﻿using Azure.Messaging.ServiceBus;
+using CommentEverythingServiceBusConnectorNETCore.Monitoring.Exceptions;
 using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
 using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Library;
 using CommentEverythingServiceBusConnectorNETCore.Topic;
@@ -28,7 +29,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
         private static string _monitoringTopic;
         private static ILogger _logger;
         private static SessionlessTopicSender ts = null;
-        public Task OnMessage(Message theMessage) {
+        public Task OnMessage(ServiceBusMessage theMessage) {
             Task returnTask;
 
             try {
@@ -47,7 +48,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation
                 if (ts is null) {
                     ts = new SessionlessTopicSender(_connectionString, _monitoringTopic);
                 }
-                Task sendTask = ts.Send(JsonConvert.SerializeObject(errorMessage), theMessage.UserProperties["CollectionId"].ToString(), theMessage.UserProperties["Context"].ToString(), DateTime.MinValue, "SYNTHETIC_ERROR");
+                Task sendTask = ts.Send(JsonConvert.SerializeObject(errorMessage), theMessage.ApplicationProperties["CollectionId"].ToString(), theMessage.ApplicationProperties["Context"].ToString(), DateTime.MinValue, "SYNTHETIC_ERROR");
                 returnTask = Task.WhenAll(new Task[] { sendTask });
             }
 

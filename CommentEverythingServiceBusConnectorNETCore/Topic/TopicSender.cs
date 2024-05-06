@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
         string ServiceBusConnectionString;
         string TopicName;
         private ITopicClient queueClient;
-        private List<List<Message>> _messageListStructure = new List<List<Message>>();
+        private List<List<ServiceBusMessage>> _messageListStructure = new List<List<ServiceBusMessage>>();
         private long _currentSizeTotal = 0;
 
         //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
@@ -107,48 +108,50 @@ namespace CommentEverythingServiceBusConnectorNETCore.Topic {
                 queueClient = new TopicClient(ServiceBusConnectionString, TopicName);
 
                 // --- Setup
-                _messageListStructure = new List<List<Message>>();
-                _messageListStructure.Add(new List<Message>());
+                _messageListStructure = new List<List<ServiceBusMessage>>();
+                _messageListStructure.Add(new List<ServiceBusMessage>());
                 _currentSizeTotal = 0;
                 int messageCount = 0;
 
                 // --- Loop through message IList
                 foreach (string m in messages) {
                     messageCount = messageCount + 1;
-                    Message msg = new Message(Encoding.UTF8.GetBytes(m)) {
+                    ServiceBusMessage msg = new ServiceBusMessage(Encoding.UTF8.GetBytes(m)) {
                         SessionId = groupId,
                         CorrelationId = context
                     };
 
                     if (messageCount == messages.Count) {
-                        msg.Label = "last";
+                        msg.Subject = "last";
                     } else if (messageCount == 1) {
-                        msg.Label = "first";
+                        msg.Subject = "first";
                     } else {
-                        msg.Label = "interim";
+                        msg.Subject = "interim";
                     }
-                    msg.UserProperties.Add("CollectionId", groupId);
-                    msg.UserProperties.Add("Count", messages.Count);
-                    msg.UserProperties.Add("Context", context);
-                    msg.UserProperties.Add("EventType", eventType);
-                    msg.UserProperties.Add("SubContext", subContext);
+                    msg.ApplicationProperties.Add("CollectionId", groupId);
+                    msg.ApplicationProperties.Add("Count", messages.Count);
+                    msg.ApplicationProperties.Add("Context", context);
+                    msg.ApplicationProperties.Add("EventType", eventType);
+                    msg.ApplicationProperties.Add("SubContext", subContext);
                     msg.MessageId = Guid.NewGuid().ToString("D");
                     if (scheduledTime != DateTime.MinValue) {
                         msg.ScheduledEnqueueTimeUtc = scheduledTime;
                     }
+                    /*
                     if (_currentSizeTotal + msg.Size > 100000) {
                         _currentSizeTotal = 0;
-                        _messageListStructure.Add(new List<Message>());
+                        _messageListStructure.Add(new List<ServiceBusMessage>());
                     }
                     _currentSizeTotal = _currentSizeTotal + msg.Size;
                     if (!(logger is null)) {
                         logger.LogInformation("Adding message with size " + msg.Size.ToString() + " | Total messages size " + _currentSizeTotal.ToString());
                     }
+                    */
                     _messageListStructure[_messageListStructure.Count - 1].Add(msg);
                 }
 
                 List<Task> taskList = new List<Task>();
-                foreach (List<Message> l in _messageListStructure) {
+                foreach (List<ServiceBusMessage> l in _messageListStructure) {
                     if (!(logger is null)) {
                         logger.LogInformation("Adding task to send message (" + (taskList.Count + 1).ToString() + ")");
                     }

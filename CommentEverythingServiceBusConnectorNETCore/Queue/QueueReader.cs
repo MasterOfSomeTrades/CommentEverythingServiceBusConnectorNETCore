@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
 
         private string ServiceBusConnectionString;
         private string QueueName;
-        private QueueClient queueClient;
+        private ServiceBusClient queueClient;
         SemaphoreSlim sLock = new SemaphoreSlim(5);
 
         //private ILoggerFactory loggerFactory = new LoggerFactory().AddConsole().AddAzureWebAppDiagnostics();
@@ -36,8 +37,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
 
         public void Connect() {
             try {
-                queueClient = new QueueClient(ServiceBusConnectionString, QueueName);
-                var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler) {
+                queueClient = new ServiceBusClient(ServiceBusConnectionString, QueueName);
+                /*var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler) {
                     // Maximum number of concurrent calls to the callback ProcessMessagesAsync(), set to 1 for simplicity.
                     // Set it according to how many messages the application wants to process in parallel.
                     MaxConcurrentCalls = 5,
@@ -45,8 +46,8 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
                     // Indicates whether the message pump should automatically complete the messages after returning from user callback.
                     // False below indicates the complete operation is handled by the user callback as in ProcessMessagesAsync().
                     AutoComplete = false
-                };
-                queueClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
+                };*/
+                queueClient.RegisterMessageHandler(ProcessMessagesAsync);
             } catch (Exception ex) {
                 if (!(logger is null)) {
                     logger.LogError(ex.Message + ex.StackTrace);
@@ -55,9 +56,9 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
             }
         }
 
-        protected abstract void ProcessMessage(Message messageAsObject, string messageAsUTF8);
+        protected abstract void ProcessMessage(ServiceBusMessage messageAsObject, string messageAsUTF8);
 
-        private async Task ProcessMessagesAsync(Message message, CancellationToken token) {
+        private async Task ProcessMessagesAsync(ServiceBusMessage message, CancellationToken token) {
             string messageAsString = "";
             Task completionTask;
             try {
@@ -113,15 +114,6 @@ namespace CommentEverythingServiceBusConnectorNETCore.Queue {
             // Note: Use the cancellationToken passed as necessary to determine if the queueClient has already been closed.
             // If queueClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
             // to avoid unnecessary exceptions.
-        }
-
-        // Use this handler to examine the exceptions received on the message pump.
-        Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs) {
-            var context = exceptionReceivedEventArgs.ExceptionReceivedContext;
-            string exMsg = exceptionReceivedEventArgs.Exception.Message;
-            string stackTrace = exceptionReceivedEventArgs.Exception.StackTrace;
-
-            return Task.CompletedTask;
         }
     }
 }
