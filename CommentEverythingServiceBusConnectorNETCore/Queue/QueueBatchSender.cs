@@ -1,5 +1,4 @@
 ﻿using Azure.Messaging.ServiceBus;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

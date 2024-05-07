@@ -1,6 +1,5 @@
 ﻿using Azure.Messaging.ServiceBus;
 using CommentEverythingServiceBusConnectorNETCore.Topic;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

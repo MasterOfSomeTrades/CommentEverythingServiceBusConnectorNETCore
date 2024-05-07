@@ -1,7 +1,6 @@
 ﻿using Azure.Messaging.ServiceBus;
 using CommentEverythingServiceBusConnectorNETCore.Communications;
 using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;

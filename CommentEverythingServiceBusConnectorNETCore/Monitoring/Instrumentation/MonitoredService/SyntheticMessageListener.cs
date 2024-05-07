@@ -3,7 +3,6 @@ using CommentEverythingServiceBusConnectorNETCore.Monitoring.Exceptions;
 using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.InstrumentedObjects;
 using CommentEverythingServiceBusConnectorNETCore.Monitoring.Instrumentation.Library;
 using CommentEverythingServiceBusConnectorNETCore.Topic;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
